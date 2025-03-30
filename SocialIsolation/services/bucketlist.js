@@ -34,22 +34,33 @@ export const BucketList = () => {
     }
   };
   console.log('Bucketlist state:', bucketlist);  // Check bucketlist here
+  
+  // Fetch bucketlist items immediately when the component mounts
+  useEffect(() => {
+    fetchBucketList();
+  }, []);
+
   return (
     <div>
       <h2>BucketList Items</h2>
-
-      <button onClick={fetchBucketList}>Fetch BucketList</button>
-
       <div style={{ display: 'flex', flexWrap: 'wrap' }}>
         {bucketlist.length > 0 ? (
           bucketlist.map(item => (
-            <div key={item.id} style={{ margin: '20px', textAlign: 'center' }}>
+            <div key={item.id} style={{
+              margin: '20px',
+              textAlign: 'center',
+              display: 'flex',
+              flexDirection: 'column',  // Arrange content vertically
+              alignItems: 'center',      // Horizontally center content
+              justifyContent: 'center',  // Vertically center content
+              maxWidth: '200px', 
+             }}>
               {/* Display image using relative path stored in Firestore */}
               {item.Image && (
                  // <Image source={require('../assets/images/${item.image}')} style={{ width: 200, height: 200 }} />
                // <Image source={imageMap[item.image]} style={{ width: 200, height: 200 }} />
 
-                <Image source={require('../assets/images/bucketListImages/campingImage.jpg')} style={{ width: 200, height: 200 }} />
+                <Image source={require('../assets/images/bucketListImages/campingImage.jpg')} style={{ width: 100, height: 100, borderRadius: '12%', justifyContent: 'center' }} />
               )}
               <h3>{item.Name}</h3> {/* Display the item name */}
             </div>
