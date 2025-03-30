@@ -1,15 +1,18 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Signup } from '../../services/signup';
-import { Link } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
+
 
 export default function SignupScreen() {
+  const navigation = useNavigation();
+
   return (
     <ScrollView style={{ backgroundColor: '#25292e' }} contentContainerStyle={{ alignItems: 'center', justifyContent: 'center', padding: 20 }}>
       <Signup />
-      <Link href="/login" style={styles.link}>
+      <TouchableOpacity onPress={() => navigation.navigate('auth')}>
         <Text style={styles.linkText}>Already have an account? Log In</Text>
-      </Link>
+      </TouchableOpacity>
     </ScrollView>
   );
 }

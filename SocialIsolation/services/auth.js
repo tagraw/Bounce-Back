@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView 
 import { app } from '../config/firebase';
 import { getAuth, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from 'firebase/auth';
 import * as Font from 'expo-font';  
+import { useNavigation } from '@react-navigation/native';
 
 export const Auth = () => {
   const [fontLoaded, setFontLoaded] = useState(false); 
@@ -10,6 +11,9 @@ export const Auth = () => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  const navigation = useNavigation();
+
 
   // Load the font
   useEffect(() => {
@@ -97,7 +101,7 @@ export const Auth = () => {
 
         <View style={styles.footer}>
           <Text style={styles.footerText}>Don't have an account? </Text>
-          <TouchableOpacity onPress={signUpUser}>
+          <TouchableOpacity onPress={() => navigation.navigate('signup')}>
             <Text style={styles.signUpText}>Sign Up</Text>
           </TouchableOpacity>
         </View>
