@@ -19,7 +19,25 @@ export default function TabLayout() {
       }}
     >
       <Tabs.Screen
+        name="signup"
+        options={{
+          title: 'SignUp',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'information-circle' : 'information-circle-outline'} color={color} size={24}/>
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="index"
+        options={{
+          title: 'SignIn',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'information-circle' : 'information-circle-outline'} color={color} size={24}/>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="home"
         options={{
           title: 'Home',
           tabBarIcon: ({ color, focused }) => (
@@ -28,11 +46,29 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="about"
+        name="addbucketitems"
         options={{
-          title: 'About',
+          title: 'addbucketitems',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'information-circle' : 'information-circle-outline'} color={color} size={24}/>
+            <Ionicons name={focused ? 'home-sharp' : 'home-outline'} color={color} size={24} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="mybucketlist"
+        options={{
+          title: 'mybucketlist',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'home-sharp' : 'home-outline'} color={color} size={24} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="singularbucketitem"
+        options={{
+          title: 'singularbucketitem',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'home-sharp' : 'home-outline'} color={color} size={24} />
           ),
         }}
       />

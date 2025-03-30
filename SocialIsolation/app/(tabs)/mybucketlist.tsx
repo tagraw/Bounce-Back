@@ -1,4 +1,5 @@
 import { Auth } from '../../services/auth';
+import { db } from '../../services/bucketlist';
 import { Text, View, StyleSheet } from 'react-native';
 import { Link } from 'expo-router'; 
 
