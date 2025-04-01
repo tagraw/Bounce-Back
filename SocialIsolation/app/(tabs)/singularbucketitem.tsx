@@ -1,4 +1,4 @@
-import { Auth } from '../../services/auth';
+import { Login } from '../../services/login';
 import { Text, View, StyleSheet } from 'react-native';
 import { Link } from 'expo-router'; 
 
@@ -6,7 +6,7 @@ import { Link } from 'expo-router';
 export default function Index() {
   return (
     <div className= "App">
-      <Auth/>
+      <Login/>
     </div>
   );
 }

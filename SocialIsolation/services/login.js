@@ -5,7 +5,7 @@ import { getAuth, signInWithEmailAndPassword, signOut, createUserWithEmailAndPas
 import * as Font from 'expo-font';  
 import { useNavigation } from '@react-navigation/native';
 
-export const Auth = () => {
+export const Login = () => {
   const [fontLoaded, setFontLoaded] = useState(false); 
   const auth = getAuth(app);
 
@@ -194,5 +194,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Auth;
 

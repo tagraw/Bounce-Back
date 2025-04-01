@@ -1,31 +1,24 @@
-import { Auth } from '../../services/auth';
-import { Text, View, StyleSheet } from 'react-native';
-import { Link } from 'expo-router'; 
-
+import React from 'react';
+import { ScrollView, StyleSheet } from 'react-native';
+import { Login } from '../../services/login';
 
 export default function Index() {
-  
   return (
-    <div className= "App">
-      <Auth/>
-    </div>
+    <ScrollView style={styles.scrollContainer}
+    contentContainerStyle={styles.contentContainer}>
+      <Login />
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  scrollContainer: {
     flex: 1,
     backgroundColor: '#25292e',
+    padding: 20,
+  },
+  contentContainer: {
     alignItems: 'center',
     justifyContent: 'center',
   },
-  text: {
-    color: '#fff',
-  },
-  button: {
-    fontSize: 20,
-    textDecorationLine: 'underline',
-    color: '#fff',
-  },
 });
-

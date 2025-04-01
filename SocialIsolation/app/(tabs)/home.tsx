@@ -1,32 +1,10 @@
-// import { Text, View, StyleSheet } from 'react-native';
-
-// export default function AboutScreen() {
-//   return (
-//     <View style={styles.container}>
-//       <Text style={styles.text}>About screen</Text>
-//     </View>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#25292e',
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-//   text: {
-//     color: '#fff',
-//   },
-// });
-
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // Make sure to install @expo/vector-icons or react-native-vector-icons
 
 export default function HomeScreen() {
   return (
-    <ScrollView style={styles.container}>``
+    <ScrollView style={styles.container}>
       {/* Header */}
       <View style={styles.headerContainer}>
         <Text style={styles.headerTitle}>Welcome Back, (User)!</Text>
