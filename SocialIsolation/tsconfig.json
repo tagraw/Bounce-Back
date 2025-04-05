@@ -6,12 +6,16 @@
       "@/*": [
         "./*"
       ]
-    }
+    },
+    "moduleResolution": "node16",
+    "module": "Node16"
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts"
-, "services/login.js", "config/firebase.js"  ]
+    "expo-env.d.ts",
+    "services/login.js",
+    "config/firebase.js"
+, "app/screens/singularbucketitem.tsx"  ]
 }

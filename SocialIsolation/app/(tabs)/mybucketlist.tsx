@@ -1,15 +1,26 @@
-import { Login } from '../../services/login';
 import { Text, View, StyleSheet } from 'react-native';
 import { Link } from 'expo-router'; 
+import StackNavigator from '../../navigation/StackNavigation.tsx';
+import SingleBucketItem from '../../screens/singularbucketitem.tsx';
+import { NavigationContainer } from '@react-navigation/native';
 
-
-export default function Index() {
+export default function MyBucketList() {
   return (
-    <div className= "App">
-      <Login/>
-    </div>
+    <View style={styles.container}>
+      <Text style={styles.text}>Welcome to My Bucket List!</Text>
+    </View>
   );
 }
+
+const MyBucketListNav = () => {
+    return (
+      <NavigationContainer>
+        <StackNavigator />
+      </NavigationContainer>
+    );  
+  }
+
+
 
 const styles = StyleSheet.create({
   container: {

@@ -63,7 +63,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="singularbucketitem"
         options={{
           title: 'singularbucketitem',
@@ -71,7 +71,7 @@ export default function TabLayout() {
             <Ionicons name={focused ? 'home-sharp' : 'home-outline'} color={color} size={24} />
           ),
         }}
-      />
+      /> */}
     </Tabs>
   );
 }

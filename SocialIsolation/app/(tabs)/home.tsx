@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // Make sure to install @expo/vector-icons or react-native-vector-icons
 
+
+
 export default function HomeScreen() {
   return (
     <ScrollView style={styles.container}>

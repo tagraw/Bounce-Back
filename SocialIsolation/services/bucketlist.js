@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { app } from '../config/firebase';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import { Image } from 'react-native';
+import MyBucketList from '../(tabs)/mybucketlist.tsx';
 
 export const BucketList = () => {
   // Access Firestore instance.
@@ -15,6 +16,7 @@ export const BucketList = () => {
    // 'scubaDivingImage.jpg': require('../assets/images/scubaDivingImage.jpg'),
    // 'default.jpg': require('../assets/images/default.jpg'), // Fallback image
   };*/
+
 
   // Keep track of the fetched bucketlist items in state.
   const [bucketlist, setBucketlist] = useState([]);

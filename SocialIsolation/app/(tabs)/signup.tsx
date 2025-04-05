@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { Signup } from '../../services/signup';
+import { Signup } from '../../services/signup.js';
 
 export default function SignupScreen() {
   return (

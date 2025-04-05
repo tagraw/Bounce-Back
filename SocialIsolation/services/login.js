@@ -14,6 +14,8 @@ export const Login = () => {
 
   const navigation = useNavigation();
 
+  useEffect (() => { getAuth(app); }, []); 
+  // Check if user is already logged in
 
   // Load the font
   useEffect(() => {
