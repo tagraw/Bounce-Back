@@ -3,6 +3,7 @@ import { app } from '../config/firebase';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import { Image } from 'react-native';
 
+
 export const BucketList = () => {
   // Access Firestore instance.
   const db = getFirestore(app);
@@ -42,7 +43,9 @@ export const BucketList = () => {
 
   return (
     <div>
-      <h2>BucketList Items</h2>
+      <text>
+        <h2>BucketList Items</h2>
+      </text>
       <div style={{ display: 'flex', flexWrap: 'wrap' }}>
         {bucketlist.length > 0 ? (
           bucketlist.map(item => (

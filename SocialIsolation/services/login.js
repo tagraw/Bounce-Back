@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
+import { Image, View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, SafeAreaView } from 'react-native';
 import { app } from '../config/firebase';
 import { getAuth, signInWithEmailAndPassword, signOut, createUserWithEmailAndPassword } from 'firebase/auth';
-import * as Font from 'expo-font';  
 import { useNavigation } from '@react-navigation/native';
+import styles from './loginStyles';
+import * as Font from 'expo-font';
 
 export const Login = () => {
   const [fontLoaded, setFontLoaded] = useState(false); 
@@ -14,18 +15,24 @@ export const Login = () => {
 
   const navigation = useNavigation();
 
-
+  
   // Load the font
   useEffect(() => {
-    const loadFonts = async () => {
-      await Font.loadAsync({
-        'SpaceMono-Regular': require('../assets/fonts/SpaceMono-Regular.ttf'),
-      });
-      setFontLoaded(true); 
-    };
-    loadFonts();
-  }, []);
+      const loadFonts = async () => {
+        await Font.loadAsync({
+          'Baloo-Regular': require('../assets/fonts/Baloo-Regular.ttf'),
+        });
+        setFontLoaded(true);
+      };
+      loadFonts();
+    }, []);
 
+  // Show "Loading fonts..." while fonts are loading
+  if (!fontLoaded) {
+    return <Text>Loading fonts...</Text>; 
+  }
+
+  // Sign Up function
   const signUpUser = async () => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -37,6 +44,7 @@ export const Login = () => {
     }
   };
 
+  // Sign In function
   const signInUser = async () => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -48,6 +56,7 @@ export const Login = () => {
     }
   };
 
+  // Sign Out function
   const signOutUser = async () => {
     try {
       await signOut(auth);
@@ -59,139 +68,60 @@ export const Login = () => {
     }
   };
 
-  
-  if (!fontLoaded) {
-    return <Text>Loading fonts...</Text>; 
-  }
-
   return (
-    <ScrollView style={styles.container}>
-      {/* Header */}
-      <View style={styles.headerContainer}>
-        <Text style={styles.headerTitle}>Welcome Back!</Text>
-      </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
+      <ScrollView style={styles.container}>
+      <View style={styles.container}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <Image 
+    source={require('../assets/images/logo.png')} 
+    style={{ width: 120, height: 120 }} 
+  />
 
-      {/* Login Form */}
-      <View style={styles.formContainer}>
-        <Text style={styles.formSubTitle}>Login to continue</Text>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Username"
-          value={email}
-          onChangeText={(text) => setEmail(text)}
-        />
 
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          secureTextEntry
-          value={password}
-          onChangeText={(text) => setPassword(text)}
-        />
 
-        <View style={styles.rememberMe}>
-          <Text style={styles.rememberText}>Remember me</Text>
-          <Text style={styles.forgotPassword}>Forgot password</Text>
-        </View>
-
-        <TouchableOpacity style={styles.button} onPress={signInUser}>
-          <Text style={styles.buttonText}>Login</Text>
-        </TouchableOpacity>
-
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>Don't have an account? </Text>
-          <TouchableOpacity onPress={() => navigation.navigate('signup')}>
-            <Text style={styles.signUpText}>Sign Up</Text>
+</View>
+        {/* Header */}
+          <Text style={styles.headerTitle}>Welcome Back!</Text>
+        {/* Login Form */}
+        
+          <Text style={styles.subtext}>Login to continue</Text>
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            style={styles.input}
+            // placeholder="Email"
+            // placeholderTextColor="#888" 
+            value={email}
+            onChangeText={(text) => setEmail(text)}
+          />
+          <Text style={styles.label}>Password</Text>
+          <TextInput
+            // placeholder="Password"
+            // placeholderTextColor="#888" 
+            style={styles.input}
+            secureTextEntry
+            value={password}
+            onChangeText={(text) => setPassword(text)}
+          />
+  
+          <View style={styles.rememberMe}>
+            <Text style={styles.subtext}>Remember me</Text>
+            <Text style={styles.subtext}>Forgot password</Text>
+          </View>
+  
+          <TouchableOpacity style={styles.button} onPress={signInUser}>
+            <Text style={styles.buttonText}>Login</Text>
           </TouchableOpacity>
+  
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>Don't have an account? </Text>
+            <TouchableOpacity onPress={() => navigation.navigate('signup')}>
+              <Text style={styles.signUpText}>Sign Up</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    paddingHorizontal: 16,
-    paddingTop: 40,
-  },
-  headerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    fontFamily: 'SpaceMono-Regular',
-  },
-  formContainer: {
-    marginTop: 40,
-  },
-  formSubTitle: {
-    fontSize: 16,
-    color: '#777',
-    marginBottom: 20,
-    fontFamily: 'SpaceMono-Regular', 
-  },
-  input: {
-    width: '100%',
-    padding: 12,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    fontSize: 16,
-    fontFamily: 'SpaceMono-Regular', 
-  },
-  rememberMe: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  rememberText: {
-    fontSize: 14,
-    color: '#777',
-    fontFamily: 'SpaceMono-Regular', 
-  },
-  forgotPassword: {
-    fontSize: 14,
-    color: '#007bff',
-    textDecorationLine: 'underline',
-    fontFamily: 'SpaceMono-Regular', 
-  },
-  button: {
-    backgroundColor: '#007bff',
-    paddingVertical: 12,
-    borderRadius: 5,
-    marginBottom: 20,
-    alignItems: 'center',
-    fontFamily: 'SpaceMono-Regular', 
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontFamily: 'SpaceMono-Regular', 
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  footerText: {
-    fontSize: 14,
-    color: '#777',
-    fontFamily: 'SpaceMono-Regular', 
-  },
-  signUpText: {
-    fontSize: 14,
-    color: '#007bff',
-    textDecorationLine: 'underline',
-    fontFamily: 'SpaceMono-Regular', 
-  },
-});
-
-
