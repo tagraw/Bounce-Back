@@ -6,11 +6,14 @@ export default StyleSheet.create({
         fontFamily: 'Baloo-Regular', // Make sure the font is loaded properly
         fontSize: 24,
       },
-    container: {
+      container: {
         flex: 1,
         backgroundColor: '#fff',
-        paddingHorizontal: 20,
-        paddingTop: 50,
+        width: '100vw',
+        maxWidth: '100%',
+        paddingHorizontal: '20vw',
+        marginHorizontal: 0,
+        paddingTop: 30,
         //alignItems: 'center',
       },
       headerTitle: {

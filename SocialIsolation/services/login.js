@@ -71,17 +71,17 @@ export const Login = () => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
       <ScrollView style={styles.container}>
-      <View style={styles.container}>
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <View style={styles.container} >
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center'}}> 
       <Image 
-    source={require('../assets/images/logo.png')} 
-    style={{ width: 120, height: 120 }} 
-  />
+        source={require('../assets/images/logo.png')} 
+        style={{ width: 120, height: 120 }} 
+      />
 
 
 
 
-</View>
+      </View>
         {/* Header */}
           <Text style={styles.headerTitle}>Welcome Back!</Text>
         {/* Login Form */}

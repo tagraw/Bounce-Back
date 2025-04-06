@@ -1,7 +1,9 @@
 import { Tabs } from 'expo-router';
+import React, { useState } from 'react';
 
 import Ionicons from '@expo/vector-icons/Ionicons';
 
+ const [fontLoaded, setFontLoaded] = useState(false); 
 
 export default function TabLayout() {
   return (
@@ -9,12 +11,12 @@ export default function TabLayout() {
       screenOptions={{
         tabBarActiveTintColor: '#ffd33d',
         headerStyle: {
-          backgroundColor: '#25292e',
+          backgroundColor: '#ffffff',
         },
         headerShadowVisible: false,
         headerTintColor: '#fff',
         tabBarStyle: {
-        backgroundColor: '#25292e',
+        backgroundColor: '#25292e', 
         },
       }}
     >
