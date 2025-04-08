@@ -1,41 +1,67 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView 
-} from'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  ScrollView,
+  Platform,
+  SafeAreaView,
+  Dimensions,
+} from 'react-native';
 import { app } from '../config/firebase';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, doc, setDoc } from 'firebase/firestore';
-import * as Font from 'expo-font';
-import { Link } from 'expo-router';
+import * as Location from 'expo-location';
+import { Link, useRouter } from 'expo-router';
+import {
+  useFonts,
+  Poppins_400Regular,
+  Poppins_700Bold,
+} from '@expo-google-fonts/poppins';
 
 export const Signup = () => {
-  const [fontLoaded, setFontLoaded] = useState(false);
   const auth = getAuth(app);
   const db = getFirestore(app);
-  const [firstName, setFirstName]       = useState('');
-  const [lastName, setLastName]         = useState('');
-  const [email, setEmail]               = useState('');
-  const [password, setPassword]         = useState('');
-  const [birthdayYear, setBirthdayYear] = useState('');
-  const [location, setLocation]         = useState('');
+  const router = useRouter();
 
-  // Load custom font
+  const [fontsLoaded] = useFonts({
+    Poppins_400Regular,
+    Poppins_700Bold,
+  });
+
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [birthdayYear, setBirthdayYear] = useState('');
+  const [location, setLocation] = useState('');
+
   useEffect(() => {
-    const loadFonts = async () => {
-      await Font.loadAsync({
-        'SpaceMono-Regular': require('../assets/fonts/SpaceMono-Regular.ttf'),
-      });
-      setFontLoaded(true);
+    const fetchLocation = async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') return;
+
+        const currentPosition = await Location.getCurrentPositionAsync({});
+        if (Platform.OS !== 'web') {
+          const [geo] = await Location.reverseGeocodeAsync(currentPosition.coords);
+          setLocation(`${geo.city || ''}, ${geo.region || ''}`);
+        } else {
+          setLocation(`Lat: ${currentPosition.coords.latitude.toFixed(4)}, Lng: ${currentPosition.coords.longitude.toFixed(4)}`);
+        }
+      } catch (error) {
+        console.error('Error fetching location:', error);
+      }
     };
-    loadFonts();
+    fetchLocation();
   }, []);
 
   const signUpUser = async () => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      console.log('User signed up successfully:', userCredential.user);
-
-      // Add extra user fields to Firestore in the "users" collection
       const userRef = doc(db, 'users', userCredential.user.uid);
       await setDoc(userRef, {
         firstName,
@@ -43,158 +69,115 @@ export const Signup = () => {
         email,
         birthdayYear,
         location,
-        createdAt: new Date(), // You can also use serverTimestamp() here
+        createdAt: new Date(),
       });
 
       Alert.alert('Success', 'User signed up successfully!');
+      router.push('/(auth)/selectgroup');
     } catch (error) {
       console.error('Error signing up:', error);
       Alert.alert('Error', 'There was an issue signing up. Please try again.');
     }
   };
 
-  if (!fontLoaded) {
-    return <Text>Loading fonts...</Text>;
-  }
+  if (!fontsLoaded) return <Text>Loading fonts...</Text>;
 
   return (
-    <ScrollView style={styles.container}>
-      {/* Header */}
-      <View style={styles.headerContainer}>
-        <Text style={styles.headerTitle}>Create Your Account</Text>
-      </View>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <Text style={styles.title}>Welcome! Just a few details to begin.</Text>
 
-      {/* Signup Form */}
-      <View style={styles.formContainer}>
-        <Text style={styles.formSubTitle}>Sign up to get started</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="First Name"
-          placeholderTextColor="#999"
-          value={firstName}
-          onChangeText={setFirstName}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Last Name"
-          placeholderTextColor="#999"
-          value={lastName}
-          onChangeText={setLastName}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          placeholderTextColor="#999"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor="#999"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Birth Year (e.g. 1990)"
-          placeholderTextColor="#999"
-          value={birthdayYear}
-          onChangeText={setBirthdayYear}
-          keyboardType="numeric"
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Location (e.g. New York, NY)"
-          placeholderTextColor="#999"
-          value={location}
-          onChangeText={setLocation}
-        />
+        <Text style={styles.label}>First Name</Text>
+        <TextInput style={styles.input} value={firstName} onChangeText={setFirstName} placeholder="First Name" placeholderTextColor="#888" />
+
+        <Text style={styles.label}>Last Name</Text>
+        <TextInput style={styles.input} value={lastName} onChangeText={setLastName} placeholder="Last Name" placeholderTextColor="#888" />
+
+        <Text style={styles.label}>Email</Text>
+        <TextInput style={styles.input} value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" placeholder="Email" placeholderTextColor="#888" />
+
+        <Text style={styles.label}>Password</Text>
+        <TextInput style={styles.input} value={password} onChangeText={setPassword} secureTextEntry placeholder="Password" placeholderTextColor="#888" />
+
+        <Text style={styles.label}>Birth Year</Text>
+        <TextInput style={styles.input} value={birthdayYear} onChangeText={setBirthdayYear} keyboardType="numeric" placeholder="e.g. 2005" placeholderTextColor="#888" />
+
+        <Text style={styles.label}>Location (auto-fetched)</Text>
+        <TextInput style={[styles.input, { color: '#999' }]} value={location} editable={false} />
 
         <TouchableOpacity style={styles.button} onPress={signUpUser}>
-          <Link href="/addbucketitems">
-            <Text style={styles.buttonText}>Sign Up</Text>
-          </Link>   
+          <Text style={styles.buttonText}>Next</Text>
         </TouchableOpacity>
 
-        {/* Footer with navigation to Login */}
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>Already have an account? </Text>
-          <Link href="">
+        <Text style={styles.bottomText}>
+          Already have an account?{' '}
+          <Link href="/login">
             <Text style={styles.loginText}>Log In</Text>
           </Link>
-        </View>
-      </View>
-    </ScrollView>
+        </Text>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
+const { height } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingHorizontal: 16,
-    paddingTop: 40,
   },
-  headerContainer: {
-    flexDirection: 'row',
+  scrollContainer: {
+    padding: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
+    minHeight: height,
   },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    fontFamily: 'SpaceMono-Regular',
+  title: {
+    fontFamily: 'Poppins_700Bold',
+    fontSize: 20,
+    textAlign: 'center',
+    marginBottom: 30,
+    color: '#000',
   },
-  formContainer: {
-    marginTop: 40,
-  },
-  formSubTitle: {
-    fontSize: 16,
-    color: '#777',
-    marginBottom: 20,
-    fontFamily: 'SpaceMono-Regular',
+  label: {
+    fontFamily: 'Poppins_700Bold',
+    alignSelf: 'flex-start',
+    color: '#228B22',
+    marginBottom: 6,
+    marginTop: 6,
   },
   input: {
     width: '100%',
-    padding: 12,
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    fontSize: 16,
-    fontFamily: 'SpaceMono-Regular',
+    backgroundColor: '#fdf8dd',
+    borderRadius: 20,
+    padding: 14,
+    marginBottom: 12,
+    fontSize: 15,
+    fontFamily: 'Poppins_400Regular',
   },
   button: {
-    backgroundColor: '#007bff',
-    paddingVertical: 12,
-    borderRadius: 5,
-    marginBottom: 20,
+    backgroundColor: '#fbd5d5',
+    paddingVertical: 14,
+    borderRadius: 24,
+    width: '100%',
     alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 20,
   },
   buttonText: {
-    color: '#fff',
+    fontFamily: 'Poppins_700Bold',
     fontSize: 16,
-    fontFamily: 'SpaceMono-Regular',
+    color: '#000',
   },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  footerText: {
-    fontSize: 14,
-    color: '#777',
-    fontFamily: 'SpaceMono-Regular',
+  bottomText: {
+    fontSize: 13,
+    color: '#333',
+    fontFamily: 'Poppins_400Regular',
   },
   loginText: {
-    fontSize: 14,
-    color: '#007bff',
+    fontFamily: 'Poppins_700Bold',
+    color: '#000',
     textDecorationLine: 'underline',
-    fontFamily: 'SpaceMono-Regular', 
   },
 });

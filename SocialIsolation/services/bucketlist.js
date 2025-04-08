@@ -1,25 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { app } from '../config/firebase';
+import {
+  View, Text, TouchableOpacity, Image, ScrollView, StyleSheet, Dimensions
+} from 'react-native';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
-import { Image } from 'react-native';
+import { app } from '../config/firebase';
+import { useRouter } from 'expo-router';
 
 export const BucketList = () => {
-  // Access Firestore instance.
   const db = getFirestore(app);
-  const bucketlistCollectionRef = collection(db, "bucketlist");
-
-  //images
-  /*const imageMap = {
-    'campingImage.jpg': require('../assets/images/campingImage.jpg'),
-   // 'hikingImage.jpg': require('../assets/images/hikingImage.jpg'),
-   // 'scubaDivingImage.jpg': require('../assets/images/scubaDivingImage.jpg'),
-   // 'default.jpg': require('../assets/images/default.jpg'), // Fallback image
-  };*/
-
-  // Keep track of the fetched bucketlist items in state.
+  const bucketlistCollectionRef = collection(db, 'bucketlist');
+  const router = useRouter();
   const [bucketlist, setBucketlist] = useState([]);
 
-  // Function to fetch bucketlist items.
   const fetchBucketList = async () => {
     try {
       const querySnapshot = await getDocs(bucketlistCollectionRef);
@@ -27,48 +19,156 @@ export const BucketList = () => {
         id: doc.id,
         ...doc.data(),
       }));
-      console.log('Bucketlist items fetched successfully:', items);
       setBucketlist(items);
     } catch (error) {
       console.error('Error fetching bucketlist items:', error);
     }
   };
-  console.log('Bucketlist state:', bucketlist);  // Check bucketlist here
-  
-  // Fetch bucketlist items immediately when the component mounts
+
   useEffect(() => {
     fetchBucketList();
   }, []);
 
   return (
-    <div>
-      <h2>BucketList Items</h2>
-      <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-        {bucketlist.length > 0 ? (
-          bucketlist.map(item => (
-            <div key={item.id} style={{
-              margin: '20px',
-              textAlign: 'center',
-              display: 'flex',
-              flexDirection: 'column',  // Arrange content vertically
-              alignItems: 'center',      // Horizontally center content
-              justifyContent: 'center',  // Vertically center content
-              maxWidth: '200px', 
-             }}>
-              {/* Display image using relative path stored in Firestore */}
-              {item.Image && (
-                 // <Image source={require('../assets/images/${item.image}')} style={{ width: 200, height: 200 }} />
-               // <Image source={imageMap[item.image]} style={{ width: 200, height: 200 }} />
+    <ScrollView style={styles.container}>
+      <Text style={styles.header}>Add to Your Bucket List</Text>
 
-                <Image source={require('../assets/images/bucketListImages/campingImage.jpg')} style={{ width: 100, height: 100, borderRadius: '12%', justifyContent: 'center' }} />
-              )}
-              <h3>{item.Name}</h3> {/* Display the item name */}
-            </div>
-          ))
-        ) : (
-          <p>No bucket list items available.</p>
-        )}
-      </div>
-    </div>
+      {/* Tabs */}
+      <View style={styles.tabs}>
+        <Text style={styles.tabActive}>All</Text>
+        <Text style={styles.tab}>Fitness</Text>
+        <Text style={styles.tab}>Mental Health</Text>
+        <Text style={styles.tab}>Social</Text>
+        <Text style={styles.tab}>Hobbies</Text>
+        <Text style={styles.tab}>Outdoor</Text>
+      </View>
+
+      {/* Grid */}
+      <View style={styles.grid}>
+        {bucketlist.map((item) => (
+          <View key={item.id} style={styles.card}>
+            {item.Image && (
+              <Image
+                source={require('../assets/images/bucketListImages/campingImage.jpg')} // Replace with dynamic image logic later
+                style={styles.image}
+              />
+            )}
+            <Text style={styles.label}>{item.Name}</Text>
+            <TouchableOpacity
+              style={styles.selectButton}
+              onPress={() => router.push(`/(tabs)/bucketlist/${item.id}`)}
+            >
+              <Text style={styles.selectText}>Select</Text>
+            </TouchableOpacity>
+          </View>
+        ))}
+</View>
+
+
+      {/* Next Button */}
+    
+    </ScrollView>
   );
 };
+
+const { width } = Dimensions.get('window');
+const CARD_WIDTH = (width - 64) / 3;
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#fff',
+    paddingTop: 20,
+    paddingHorizontal: 16,
+  },
+  header: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    fontFamily: 'Poppins_700Bold',
+  },
+  tabs: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 20,
+    gap: 10,
+  },
+  tab: {
+    color: '#999',
+    fontSize: 13,
+    marginRight: 12,
+    fontFamily: 'Poppins_400Regular',
+  },
+  tabActive: {
+    color: '#000',
+    fontWeight: 'bold',
+    fontSize: 13,
+    marginRight: 12,
+    borderBottomWidth: 2,
+    borderColor: '#000',
+    fontFamily: 'Poppins_700Bold',
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+  },
+  card: {
+    width: CARD_WIDTH,
+    marginBottom: 18,
+    borderRadius: 10,
+    overflow: 'hidden',
+    backgroundColor: '#f9f9f9',
+    alignItems: 'center',
+  },
+  image: {
+    width: '100%',
+    height: CARD_WIDTH,
+    borderRadius: 10,
+  },
+  label: {
+    fontSize: 12,
+    color: '#000',
+    marginTop: 4,
+    paddingBottom: 6,
+    fontFamily: 'Poppins_400Regular',
+  },
+  nextButton: {
+    backgroundColor: '#FBD5D5', // Soft pink
+    borderRadius: 40,           // More rounded (pill style)
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    alignSelf: 'center',
+    marginBottom: 40,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  
+  nextText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#000',
+    fontFamily: 'Poppins_700Bold',
+  },
+
+  selectButton: {
+    backgroundColor: '#FBD5D5',
+    borderRadius: 20,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    marginBottom: 8,
+    marginTop: 4,
+  },
+  
+  selectText: {
+    color: '#000',
+    fontWeight: 'bold',
+    fontSize: 12,
+    fontFamily: 'Poppins_700Bold',
+  }
+
+  
+});
