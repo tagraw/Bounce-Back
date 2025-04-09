@@ -25,6 +25,7 @@ export const Login = () => {
     Poppins_700Bold,
   });
 
+  // Sign In function
   const signInUser = async () => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);

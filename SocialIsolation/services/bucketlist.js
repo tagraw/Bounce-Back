@@ -5,12 +5,14 @@ import {
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import { app } from '../config/firebase';
 import { useRouter } from 'expo-router';
+import * as Font from 'expo-font'
 
 export const BucketList = () => {
   const db = getFirestore(app);
   const bucketlistCollectionRef = collection(db, 'bucketlist');
   const router = useRouter();
   const [bucketlist, setBucketlist] = useState([]);
+  const [fontLoaded, setFontLoaded] = useState(false);
 
   const fetchBucketList = async () => {
     try {
@@ -24,10 +26,26 @@ export const BucketList = () => {
       console.error('Error fetching bucketlist items:', error);
     }
   };
-
   useEffect(() => {
     fetchBucketList();
   }, []);
+
+  // Load the font
+  useEffect(() => {
+    const loadFonts = async () => {
+      await Font.loadAsync({
+        'Baloo-Regular': require('../assets/fonts/Baloo-Regular.ttf'),
+        'Solway-Regular': require('../assets/fonts/Solway-Regular.ttf'),
+      });
+      setFontLoaded(true);
+    };
+    loadFonts();
+  }, []);
+
+  // Show "Loading fonts..." while fonts are loading
+  if (!fontLoaded) {
+    return <Text>Loading fonts...</Text>;
+  }
 
   return (
     <ScrollView style={styles.container}>

@@ -10,14 +10,4 @@ export default function Index() {
   );
 }
 
-const styles = StyleSheet.create({
-  scrollContainer: {
-    flex: 1,
-    backgroundColor: '#25292e',
-    padding: 20,
-  },
-  contentContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+
