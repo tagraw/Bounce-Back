@@ -43,7 +43,6 @@ export const SelectGroup = () => {
     try {
       const ref = doc(db, 'users', user.uid);
       await updateDoc(ref, { group: selectedGroup });
-      Alert.alert('Success', `You've been added to the "${selectedGroup}" group!`);
       router.push('/addbucketitems');
     } catch (error) {
       console.error('Error updating group:', error);

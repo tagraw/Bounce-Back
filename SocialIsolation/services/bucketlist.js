@@ -2,36 +2,22 @@ import React, { useState, useEffect } from 'react';
 import {
   View, Text, TouchableOpacity, Image, ScrollView, StyleSheet, Dimensions
 } from 'react-native';
-import { getFirestore, collection, getDocs } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, doc, setDoc, getDoc } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 import { app } from '../config/firebase';
 import { useRouter } from 'expo-router';
 import * as Font from 'expo-font';
-import { Ionicons } from '@expo/vector-icons'; // Checkmark icon
+import { Ionicons } from '@expo/vector-icons';
 
 export const BucketList = () => {
   const db = getFirestore(app);
-  const bucketlistCollectionRef = collection(db, 'bucketlist');
+  const masterListRef = collection(db, 'bucketlist');
   const router = useRouter();
   const [bucketlist, setBucketlist] = useState([]);
+  const [selectedItems, setSelectedItems] = useState(new Set());
   const [fontLoaded, setFontLoaded] = useState(false);
-  const [selectedItems, setSelectedItems] = useState([]); // Track selections
 
-  const fetchBucketList = async () => {
-    try {
-      const querySnapshot = await getDocs(bucketlistCollectionRef);
-      const items = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setBucketlist(items);
-    } catch (error) {
-      console.error('Error fetching bucketlist items:', error);
-    }
-  };
-
-  useEffect(() => {
-    fetchBucketList();
-  }, []);
+  const user = getAuth(app).currentUser;
 
   useEffect(() => {
     const loadFonts = async () => {
@@ -44,15 +30,45 @@ export const BucketList = () => {
     loadFonts();
   }, []);
 
-  if (!fontLoaded) {
-    return <Text>Loading fonts...</Text>;
-  }
+  const fetchBucketList = async () => {
+    try {
+      const snapshot = await getDocs(masterListRef);
+      const items = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setBucketlist(items);
+    } catch (error) {
+      console.error('Error fetching bucketlist items:', error);
+    }
+  };
+
+  const fetchUserSelections = async () => {
+    if (!user) return;
+    const userBucketRef = collection(db, 'users', user.uid, 'bucketlist');
+    const snapshot = await getDocs(userBucketRef);
+    const selected = new Set(snapshot.docs.map(doc => doc.id));
+    setSelectedItems(selected);
+  };
+
+  useEffect(() => {
+    fetchBucketList();
+    fetchUserSelections();
+  }, []);
+
+  const handleSelect = async (item) => {
+    if (!user || selectedItems.has(item.id)) return;
+
+    const userItemRef = doc(db, 'users', user.uid, 'bucketlist', item.id);
+    await setDoc(userItemRef, item); // Save full item in user bucket
+
+    setSelectedItems((prev) => new Set(prev).add(item.id));
+    router.push(`/bucketlist/${item.id}`);
+  };
+
+  if (!fontLoaded) return <Text>Loading fonts...</Text>;
 
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.header}>Add to Your Bucket List</Text>
 
-      {/* Tabs */}
       <View style={styles.tabs}>
         <Text style={styles.tabActive}>All</Text>
         <Text style={styles.tab}>Fitness</Text>
@@ -61,10 +77,9 @@ export const BucketList = () => {
         <Text style={styles.tab}>Hobbies</Text>
       </View>
 
-      {/* Grid */}
       <View style={styles.grid}>
         {bucketlist.map((item) => {
-          const isSelected = selectedItems.includes(item.id);
+          const isSelected = selectedItems.has(item.id);
           return (
             <View key={item.id} style={styles.card}>
               <View style={styles.imageWrapper}>
@@ -82,12 +97,7 @@ export const BucketList = () => {
               </View>
               <TouchableOpacity
                 style={styles.selectButton}
-                onPress={() => {
-                  if (!isSelected) {
-                    setSelectedItems((prev) => [...prev, item.id]);
-                    router.push(`/(tabs)/bucketlist/${item.id}`);
-                  }
-                }}
+                onPress={() => handleSelect(item)}
               >
                 <Text style={styles.selectText}>{item.Name}</Text>
               </TouchableOpacity>
@@ -164,7 +174,7 @@ const styles = StyleSheet.create({
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(251, 213, 213, 0.5)', // translucent pink
+    backgroundColor: 'rgba(251, 213, 213, 0.5)',
     justifyContent: 'flex-start',
     alignItems: 'flex-end',
     padding: 6,

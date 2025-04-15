@@ -44,24 +44,23 @@ export const Group = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Members in your current group:</Text>
-  
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {members.map((item) => (
-          <View key={item.id} style={styles.card}>
+      <Text style={styles.header}>Members in your group:</Text>
+
+      <FlatList
+        data={members}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <View style={styles.card}>
             <Text style={styles.name}>{item.firstName} {item.lastName}</Text>
             <Text style={styles.email}>{item.email}</Text>
           </View>
-        ))}
-      </ScrollView>
+        )}
+      />
     </View>
-  );  
+  );
 }
 
 const styles = StyleSheet.create({
-  scrollContainer: {
-    paddingBottom: 20,
-  },
   container: {
     padding: 20,
     backgroundColor: '#fff',
@@ -75,9 +74,9 @@ const styles = StyleSheet.create({
   },
   card: {
     padding: 14,
-    borderRadius: 20,
+    borderRadius: 10,
     backgroundColor: '#fbd5d5',
-    marginBottom: 15,
+    marginBottom: 12,
   },
   name: {
     fontSize: 16,
