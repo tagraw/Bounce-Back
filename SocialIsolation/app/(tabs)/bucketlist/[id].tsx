@@ -7,6 +7,8 @@ import { useLocalSearchParams } from 'expo-router';
 import { getFirestore, doc, getDoc, collection, addDoc } from 'firebase/firestore';
 import { app } from '../../../config/firebase';
 import { getAuth } from 'firebase/auth';
+import { useRouter } from 'expo-router';
+
 
 export const unstable_settings = {
   initialRouteName: 'index',
@@ -22,6 +24,7 @@ export default function BucketListDetail() {
   const db = getFirestore(app);
   const auth = getAuth(app);
   const [item, setItem] = useState(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchItem = async () => {
@@ -50,6 +53,7 @@ export default function BucketListDetail() {
         createdAt: new Date(),
       });
       Alert.alert('✅ Added!', 'Item added to your bucket list.');
+      router.push('/addbucketitems');
     } catch (error) {
       console.error('Error adding item:', error);
       Alert.alert('❌ Error', 'Could not add to your list.');

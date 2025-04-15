@@ -40,7 +40,7 @@ export default function Index() {
     <ScrollView style={styles.container}>
       <Text style={styles.header}>My Bucket List</Text>
 
-      <View style={styles.grid}>
+      <View style={styles.cardContainer}>
         {bucketlist.length > 0 ? (
           bucketlist.map((item) => (
             <TouchableOpacity
@@ -82,14 +82,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     color: '#222',
   },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    paddingBottom: 32,
-  },
   card: {
-    width: CARD_WIDTH,
+    width: '100%',
     marginBottom: 20,
     backgroundColor: '#f9f9f9',
     borderRadius: 14,

@@ -5,7 +5,8 @@ import {
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import { app } from '../config/firebase';
 import { useRouter } from 'expo-router';
-import * as Font from 'expo-font'
+import * as Font from 'expo-font';
+import { Ionicons } from '@expo/vector-icons'; // ✅ Checkmark icon
 
 export const BucketList = () => {
   const db = getFirestore(app);
@@ -13,6 +14,7 @@ export const BucketList = () => {
   const router = useRouter();
   const [bucketlist, setBucketlist] = useState([]);
   const [fontLoaded, setFontLoaded] = useState(false);
+  const [selectedItems, setSelectedItems] = useState([]); // ✅ Track selections
 
   const fetchBucketList = async () => {
     try {
@@ -26,11 +28,11 @@ export const BucketList = () => {
       console.error('Error fetching bucketlist items:', error);
     }
   };
+
   useEffect(() => {
     fetchBucketList();
   }, []);
 
-  // Load the font
   useEffect(() => {
     const loadFonts = async () => {
       await Font.loadAsync({
@@ -42,7 +44,6 @@ export const BucketList = () => {
     loadFonts();
   }, []);
 
-  // Show "Loading fonts..." while fonts are loading
   if (!fontLoaded) {
     return <Text>Loading fonts...</Text>;
   }
@@ -63,28 +64,38 @@ export const BucketList = () => {
 
       {/* Grid */}
       <View style={styles.grid}>
-        {bucketlist.map((item) => (
-          <View key={item.id} style={styles.card}>
-            {item.Image && (
-              <Image
-                source={require('../assets/images/bucketListImages/campingImage.jpg')} // Replace with dynamic image logic later
-                style={styles.image}
-              />
-            )}
-            <Text style={styles.label}>{item.Name}</Text>
-            <TouchableOpacity
-              style={styles.selectButton}
-              onPress={() => router.push(`/(tabs)/bucketlist/${item.id}`)}
-            >
-              <Text style={styles.selectText}>Select</Text>
-            </TouchableOpacity>
-          </View>
-        ))}
-</View>
-
-
-      {/* Next Button */}
-    
+        {bucketlist.map((item) => {
+          const isSelected = selectedItems.includes(item.id);
+          return (
+            <View key={item.id} style={styles.card}>
+              <View style={styles.imageWrapper}>
+                {item.Image && (
+                  <Image
+                    source={require('../assets/images/bucketListImages/campingImage.jpg')}
+                    style={styles.image}
+                  />
+                )}
+                {isSelected && (
+                  <View style={styles.overlay}>
+                    <Ionicons name="checkmark-circle" size={24} color="white" style={styles.checkmark} />
+                  </View>
+                )}
+              </View>
+              <TouchableOpacity
+                style={styles.selectButton}
+                onPress={() => {
+                  if (!isSelected) {
+                    setSelectedItems((prev) => [...prev, item.id]);
+                    router.push(`/(tabs)/bucketlist/${item.id}`);
+                  }
+                }}
+              >
+                <Text style={styles.selectText}>{item.Name}</Text>
+              </TouchableOpacity>
+            </View>
+          );
+        })}
+      </View>
     </ScrollView>
   );
 };
@@ -139,39 +150,30 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9f9f9',
     alignItems: 'center',
   },
-  image: {
+  imageWrapper: {
     width: '100%',
     height: CARD_WIDTH,
+    position: 'relative',
+    borderRadius: 10,
+    overflow: 'hidden',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
     borderRadius: 10,
   },
-  label: {
-    fontSize: 12,
-    color: '#000',
-    marginTop: 4,
-    paddingBottom: 6,
-    fontFamily: 'Poppins_400Regular',
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(251, 213, 213, 0.5)', // translucent pink
+    justifyContent: 'flex-start',
+    alignItems: 'flex-end',
+    padding: 6,
   },
-  nextButton: {
-    backgroundColor: '#FBD5D5', // Soft pink
-    borderRadius: 40,           // More rounded (pill style)
-    paddingVertical: 14,
-    paddingHorizontal: 32,
-    alignSelf: 'center',
-    marginBottom: 40,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 4,
+  checkmark: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
   },
-  
-  nextText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#000',
-    fontFamily: 'Poppins_700Bold',
-  },
-
   selectButton: {
     backgroundColor: '#FBD5D5',
     borderRadius: 20,
@@ -180,13 +182,11 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     marginTop: 4,
   },
-  
   selectText: {
     color: '#000',
     fontWeight: 'bold',
-    fontSize: 12,
+    fontSize: 8,
     fontFamily: 'Poppins_700Bold',
-  }
-
-  
+    textAlign: 'center',
+  },
 });
