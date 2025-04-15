@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Image, Dimensions
+  View, Text, TextInput, TouchableOpacity, StyleSheet,
+  ScrollView, Alert, Image, Dimensions, SafeAreaView
 } from 'react-native';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { app } from '../config/firebase';
@@ -25,7 +26,6 @@ export const Login = () => {
     Poppins_700Bold,
   });
 
-  // Sign In function
   const signInUser = async () => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -40,65 +40,71 @@ export const Login = () => {
   if (!fontsLoaded) return <Text>Loading fonts...</Text>;
 
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <Image
-        source={require('../assets/images/logo.png')}
-        style={styles.heroImage}
-        resizeMode="contain"
-      />
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <Image
+          source={require('../assets/images/logo.png')}
+          style={styles.heroImage}
+          resizeMode="contain"
+        />
 
-      <Text style={styles.title}>Welcome Back!</Text>
-      <Text style={styles.subtitle}>Login to continue</Text>
+        <Text style={styles.title}>Welcome Back!</Text>
+        <Text style={styles.subtitle}>Login to continue</Text>
 
-      <Text style={styles.label}>Email</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter your email"
-        placeholderTextColor="#999"
-        value={email}
-        onChangeText={setEmail}
-        autoCapitalize="none"
-      />
+        <Text style={styles.label}>Email</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your email"
+          placeholderTextColor="#999"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
+        />
 
-      <Text style={styles.label}>Password</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter your password"
-        placeholderTextColor="#999"
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
+        <Text style={styles.label}>Password</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your password"
+          placeholderTextColor="#999"
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
 
-      <View style={styles.row}>
-        <Text style={styles.remember}>□ Remember me</Text>
-        <Text style={styles.forgot}>Forgot password</Text>
-      </View>
+        <View style={styles.row}>
+          <Text style={styles.remember}>□ Remember me</Text>
+          <Text style={styles.forgot}>Forgot password</Text>
+        </View>
 
-      <TouchableOpacity style={styles.loginButton} onPress={signInUser}>
-        <Text style={styles.loginText}>Login</Text>
-      </TouchableOpacity>
+        <TouchableOpacity style={styles.loginButton} onPress={signInUser}>
+          <Text style={styles.loginText}>Login</Text>
+        </TouchableOpacity>
 
-      <Text style={styles.bottomText}>
-        Don’t have an account?{' '}
-        <Text style={styles.signUpLink} onPress={() => router.replace('/signup')}>
-          Sign Up
+        <Text style={styles.bottomText}>
+          Don’t have an account?{' '}
+          <Text style={styles.signUpLink} onPress={() => router.replace('/signup')}>
+            Sign Up
+          </Text>
         </Text>
-      </Text>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
   scrollContainer: {
     flexGrow: 1,
     backgroundColor: '#fff',
     padding: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 852,
+    minHeight: height, // full screen height
   },
   heroImage: {
     width: width * 0.55,
