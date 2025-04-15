@@ -46,7 +46,7 @@ export default function Index() {
             <TouchableOpacity
               key={item.id}
               style={styles.card}
-              onPress={() => router.push(`/(tabs)/userlist/${item.id}`)}
+              onPress={() => router.push(`/userlist/${item.id}`)}
             >
               {item.Image && (
                 <Image
@@ -76,9 +76,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   header: {
-    fontSize: 22,
+    fontSize: 25,
     fontWeight: 'bold',
     fontFamily: 'Poppins_700Bold',
+    marginTop: 50,
     marginBottom: 16,
     color: '#222',
   },

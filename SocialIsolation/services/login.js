@@ -30,7 +30,7 @@ export const Login = () => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       console.log('User signed in successfully:', userCredential.user);
-      Alert.alert('Success', 'User signed in successfully!');
+      // Alert.alert('Success', 'User signed in successfully!');
     } catch (error) {
       console.error('Error signing in:', error);
       Alert.alert('Error', 'Invalid credentials.');
@@ -101,7 +101,8 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
     backgroundColor: '#fff',
-    padding: 24,
+    paddingBottom: 50,
+    padding: 25,
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: height, // full screen height
@@ -109,8 +110,7 @@ const styles = StyleSheet.create({
   heroImage: {
     width: width * 0.55,
     height: width * 0.55,
-    marginTop: 10,
-    marginBottom: 10,
+    marginBottom: 30,
   },
   title: {
     fontSize: 24,

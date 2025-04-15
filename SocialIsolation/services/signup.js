@@ -72,7 +72,7 @@ export const Signup = () => {
         createdAt: new Date(),
       });
 
-      Alert.alert('Success', 'User signed up successfully!');
+      // Alert.alert('Success', 'User signed up successfully!');
       router.push('/(auth)/selectgroup');
     } catch (error) {
       console.error('Error signing up:', error);

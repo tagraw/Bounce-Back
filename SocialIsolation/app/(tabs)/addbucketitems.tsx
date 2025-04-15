@@ -1,7 +1,5 @@
 import { BucketList } from '../../services/bucketlist';
-import { Text, View, StyleSheet, ScrollView } from 'react-native';
-import { Link } from 'expo-router'; 
-
+import { ScrollView } from 'react-native';
 
 export default function Index() {
   return (

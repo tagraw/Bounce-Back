@@ -1,5 +1,4 @@
 import { StyleSheet } from 'react-native';
-import * as Font from 'expo-font';  
 
 export default StyleSheet.create({
     text: {
@@ -14,7 +13,6 @@ export default StyleSheet.create({
         paddingHorizontal: '20vw',
         marginHorizontal: 0,
         paddingTop: 30,
-        //alignItems: 'center',
       },
       headerTitle: {
         fontSize: 20,

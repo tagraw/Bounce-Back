@@ -6,7 +6,7 @@ import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import { app } from '../config/firebase';
 import { useRouter } from 'expo-router';
 import * as Font from 'expo-font';
-import { Ionicons } from '@expo/vector-icons'; // ✅ Checkmark icon
+import { Ionicons } from '@expo/vector-icons'; // Checkmark icon
 
 export const BucketList = () => {
   const db = getFirestore(app);
@@ -14,7 +14,7 @@ export const BucketList = () => {
   const router = useRouter();
   const [bucketlist, setBucketlist] = useState([]);
   const [fontLoaded, setFontLoaded] = useState(false);
-  const [selectedItems, setSelectedItems] = useState([]); // ✅ Track selections
+  const [selectedItems, setSelectedItems] = useState([]); // Track selections
 
   const fetchBucketList = async () => {
     try {
@@ -59,7 +59,6 @@ export const BucketList = () => {
         <Text style={styles.tab}>Mental Health</Text>
         <Text style={styles.tab}>Social</Text>
         <Text style={styles.tab}>Hobbies</Text>
-        <Text style={styles.tab}>Outdoor</Text>
       </View>
 
       {/* Grid */}
@@ -110,8 +109,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   header: {
-    fontSize: 20,
+    fontSize: 25,
     fontWeight: 'bold',
+    marginTop: 50,
     marginBottom: 12,
     fontFamily: 'Poppins_700Bold',
   },
@@ -145,9 +145,9 @@ const styles = StyleSheet.create({
   card: {
     width: CARD_WIDTH,
     marginBottom: 18,
-    borderRadius: 10,
+    borderRadius: 15,
     overflow: 'hidden',
-    backgroundColor: '#f9f9f9',
+    backgroundColor: '#fff',
     alignItems: 'center',
   },
   imageWrapper: {
@@ -181,6 +181,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     marginBottom: 8,
     marginTop: 4,
+    width: '100%',
+    alignSelf: 'stretch',
   },
   selectText: {
     color: '#000',

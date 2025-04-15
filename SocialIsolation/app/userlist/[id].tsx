@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View, Text, StyleSheet, FlatList, Switch, ImageBackground, Dimensions,
-  ScrollView
+  View, Text, StyleSheet, Switch, ImageBackground, Dimensions,
+  ScrollView, TouchableOpacity
 } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getFirestore, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
-import { app } from '../../../config/firebase';
+import { app } from '../../config/firebase';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function MyBucketItemDetail() {
-
   const { id } = useLocalSearchParams();
   const db = getFirestore(app);
   const auth = getAuth(app);
   const user = auth.currentUser;
+  const router = useRouter();
 
   const [item, setItem] = useState(null);
   const [completed, setCompleted] = useState([]);
@@ -53,14 +54,16 @@ export default function MyBucketItemDetail() {
   const progress = done / total;
 
   return (
-    <ScrollView>
-    <View style={styles.container}>
-      {/* Header */}
+    <ScrollView style={styles.container}>
+      {/* Header Image */}
       <ImageBackground
-        source={require('../../../assets/images/bucketListImages/campingImage.jpg')} // or item.Image
+        source={require('../../assets/images/bucketListImages/campingImage.jpg')}
         style={styles.headerImage}
-        imageStyle={{ borderBottomLeftRadius: 20, borderBottomRightRadius: 20 }}
       >
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color="#fff" />
+        </TouchableOpacity>
+
         <View style={styles.overlay}>
           <Text style={styles.title}>{item.Name}</Text>
           <Text style={styles.subtitle}>{done} out of {total} complete</Text>
@@ -70,16 +73,12 @@ export default function MyBucketItemDetail() {
         </View>
       </ImageBackground>
 
-      {/* Activities */}
+      {/* Content */}
       <View style={styles.content}>
         <Text style={styles.sectionTitle}>Activities</Text>
-        <FlatList
-          data={item.Subtasks}
-          keyExtractor={(task, index) => index.toString()}
-          numColumns={2}
-          columnWrapperStyle={styles.row}
-          renderItem={({ item: taskName }) => (
-            <View style={styles.card}>
+        <View style={styles.tasksWrapper}>
+          {item.Subtasks?.map((taskName, index) => (
+            <View key={index} style={styles.card}>
               <Text style={[
                 styles.taskText,
                 completed.includes(taskName) && styles.completedText
@@ -91,10 +90,9 @@ export default function MyBucketItemDetail() {
                 onValueChange={() => toggleSubtask(taskName)}
               />
             </View>
-          )}
-        />
+          ))}
+        </View>
       </View>
-    </View>
     </ScrollView>
   );
 }
@@ -108,9 +106,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   headerImage: {
-    height: 200,
+    height: 250,
     width: '100%',
     justifyContent: 'flex-end',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    zIndex: 10,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    padding: 6,
+    borderRadius: 20,
   },
   overlay: {
     backgroundColor: 'rgba(0,0,0,0.4)',
@@ -147,7 +154,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 12,
   },
-  row: {
+  tasksWrapper: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
   card: {

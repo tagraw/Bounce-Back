@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { getFirestore, doc, getDoc, collection, addDoc } from 'firebase/firestore';
-import { app } from '../../../config/firebase';
+import { app } from '../../config/firebase';
 import { getAuth } from 'firebase/auth';
 import { useRouter } from 'expo-router';
 
@@ -66,7 +66,7 @@ export default function BucketListDetail() {
     <View style={styles.container}>
       {/* Image header (replace with item.Image later) */}
       <Image
-        source={require('../../../assets/images/bucketListImages/campingImage.jpg')}
+        source={require('../../assets/images/bucketListImages/campingImage.jpg')}
         style={styles.image}
         resizeMode="cover"
       />
