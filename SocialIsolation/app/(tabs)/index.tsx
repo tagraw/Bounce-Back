@@ -4,7 +4,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { getAuth, signOut } from 'firebase/auth';
-import { getFirestore, collection, getDocs, doc, getDoc } from 'firebase/firestore';
+import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import { useFocusEffect } from '@react-navigation/native';
 import { app } from '../../config/firebase';
 import { router } from 'expo-router';
@@ -17,23 +17,18 @@ export default function HomeScreen() {
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  const fetchUserName = async (uid) => {
-    try {
-      const userDocRef = doc(db, 'users', uid);
-      const userDocSnap = await getDoc(userDocRef);
+  const totalSubtasks = bucketlist.reduce((sum, item) => sum + (item.Subtasks?.length || 0), 0);
+  const totalCompleted = bucketlist.reduce((sum, item) => sum + (item.CompletedSubtasks?.length || 0), 0);
 
-      if (userDocSnap.exists()) {
-        const firstName = userDocSnap.data()?.firstName || 'User';
-        setUserName(firstName);
-      } else {
-        console.warn('No such user document');
-        setUserName('User');
+  useFocusEffect(
+    useCallback(() => {
+      const user = auth.currentUser;
+      if (user) {
+        setUserName(user.email?.split('@')[0] || 'User');
+        fetchUserBucketList(user.uid);
       }
-    } catch (error) {
-      console.error('Failed to fetch user name:', error);
-      setUserName('User');
-    }
-  };
+    }, [])
+  );
 
   const fetchUserBucketList = async (uid) => {
     try {
@@ -49,18 +44,8 @@ export default function HomeScreen() {
     }
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      const user = auth.currentUser;
-      if (user) {
-        fetchUserName(user.uid);
-        fetchUserBucketList(user.uid);
-      }
-    }, [])
-  );
-
   const toggleExpand = (id) => {
-    setExpandedIds(prev => {
+    setExpandedIds((prev) => {
       const updated = new Set(prev);
       updated.has(id) ? updated.delete(id) : updated.add(id);
       return updated;
@@ -78,6 +63,7 @@ export default function HomeScreen() {
 
   return (
     <ScrollView style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
         <View>
           <Text style={styles.greeting}>Welcome Back,</Text>
@@ -94,56 +80,66 @@ export default function HomeScreen() {
       <Text style={styles.sectionTitle}>Upcoming Events</Text>
 
       {bucketlist.map((item) => {
+        const total = item.Subtasks?.length || 0;
+        const completed = item.CompletedSubtasks?.length || 0;
+        const isComplete = total > 0 && completed === total;
         const isExpanded = expandedIds.has(item.id);
 
         return (
-          <View key={item.id} style={[styles.card, !isExpanded && styles.cardCollapsed]}>
+          <View key={item.id} style={[styles.card, isComplete && styles.cardComplete]}>
             <View style={styles.imageWrapper}>
-              <Image source={require('../../assets/images/bucketListImages/campingImage.jpg')} style={styles.image} />
+              <Image
+                source={require('../../assets/images/bucketListImages/campingImage.jpg')}
+                style={styles.cardImage}
+              />
+              <View style={styles.cardOverlay} />
 
-              <TouchableOpacity
-                style={styles.expandButton}
-                onPress={() => toggleExpand(item.id)}
-              >
+              {/* Expand arrow */}
+              <TouchableOpacity onPress={() => toggleExpand(item.id)} style={styles.arrow}>
                 <Ionicons
                   name="chevron-down"
-                  size={20}
-                  color="#000"
+                  size={22}
+                  color="white"
                   style={{ transform: [{ rotate: isExpanded ? '180deg' : '0deg' }] }}
                 />
               </TouchableOpacity>
-            </View>
 
-            <View style={styles.cardContent}>
-              <Text style={styles.title}>{item.Name}</Text>
-              <Text style={styles.meta}>{item.Date} • {item.Time}</Text>
-              <Text style={styles.location}>{item.Location}</Text>
+              <View style={styles.cardContent}>
+                <Text style={styles.cardTitle}>{item.Name}</Text>
+                <Text style={styles.cardSubtext}>{item.Date} • {item.Time}</Text>
+                <Text style={styles.cardSubtext}>{item.Location}</Text>
+              </View>
             </View>
 
             {isExpanded && (
               <View style={styles.expandedContent}>
-                <Text style={styles.section}>About</Text>
-                <Text style={styles.description}>{item.Description || 'No description provided.'}</Text>
+                <Text style={styles.expandedTitle}>About</Text>
+                <Text style={styles.expandedText}>{item.Description || 'No description provided.'}</Text>
 
-                <Text style={styles.section}>Who's Attending</Text>
-                <View style={styles.attendees}>
-                  {(item.Attendees || []).map((name, idx) => (
-                    <View key={idx} style={styles.attendeeBubble}>
-                      <Text style={styles.attendeeText}>{name}</Text>
+                <Text style={styles.expandedTitle}>Who's Attending</Text>
+                <View style={styles.attendeesRow}>
+                  {(item.Attendees || []).map((name, i) => (
+                    <View key={i} style={styles.attendeeBubble}>
+                      <Text>{name}</Text>
                     </View>
                   ))}
                 </View>
 
-                <Text style={styles.section}>RSVP</Text>
-                <View style={styles.rsvpButtons}>
-                  <TouchableOpacity style={styles.yesBtn}><Text style={styles.rsvpText}>Yes</Text></TouchableOpacity>
-                  <TouchableOpacity style={styles.noBtn}><Text style={styles.rsvpText}>No</Text></TouchableOpacity>
+                <Text style={styles.expandedTitle}>RSVP</Text>
+                <View style={styles.rsvpRow}>
+                  <TouchableOpacity style={styles.yesBtn}><Text>Yes</Text></TouchableOpacity>
+                  <TouchableOpacity style={styles.noBtn}><Text>No</Text></TouchableOpacity>
                 </View>
               </View>
             )}
           </View>
         );
       })}
+
+      <View style={styles.summaryCard}>
+        <Text style={styles.summaryText}>🎯 You’re tracking {bucketlist.length} items</Text>
+        <Text style={styles.summaryText}>✅ {totalCompleted} / {totalSubtasks} subtasks completed</Text>
+      </View>
     </ScrollView>
   );
 }
@@ -183,105 +179,109 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   card: {
-    marginBottom: 30,
-    backgroundColor: '#f9f9f9',
     borderRadius: 16,
     overflow: 'hidden',
-    elevation: 3,
+    marginBottom: 20,
+    backgroundColor: '#eee',
+    position: 'relative',
+    elevation: 4,
   },
-  cardCollapsed: {
-    backgroundColor: 'transparent',
-    elevation: 0,
+  cardComplete: {
+    backgroundColor: '#fbd5d5',
+    borderColor: '#fbd5d5',
+    borderWidth: 2,
   },
   imageWrapper: {
     position: 'relative',
   },
-  expandButton: {
+  cardImage: {
+    width: '100%',
+    height: 150,
+  },
+  cardOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+  },
+  cardContent: {
+    position: 'absolute',
+    bottom: 12,
+    left: 12,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  cardSubtext: {
+    fontSize: 13,
+    color: '#eee',
+    marginTop: 2,
+  },
+  arrow: {
     position: 'absolute',
     bottom: 10,
     right: 10,
-    backgroundColor: '#fff',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     borderRadius: 20,
     padding: 6,
-    zIndex: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  image: {
-    width: '100%',
-    height: 200,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-  },
-  cardContent: {
-    padding: 16,
-    paddingBottom: 0,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 4,
-  },
-  meta: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 4,
-  },
-  location: {
-    fontSize: 15,
-    color: '#444',
-  },
-  section: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 8,
-    marginTop: 16,
-  },
-  description: {
-    fontSize: 14,
-    lineHeight: 20,
-    color: '#333',
   },
   expandedContent: {
     padding: 16,
-    paddingTop: 0,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderColor: '#eee',
   },
-  attendees: {
+  expandedTitle: {
+    fontWeight: 'bold',
+    fontSize: 14,
+    marginTop: 10,
+    marginBottom: 6,
+  },
+  expandedText: {
+    fontSize: 13,
+    color: '#444',
+    marginBottom: 10,
+  },
+  attendeesRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: 10,
+    marginBottom: 10,
   },
   attendeeBubble: {
     backgroundColor: '#eee',
-    padding: 10,
-    borderRadius: 30,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
   },
-  attendeeText: {
-    fontSize: 13,
-    color: '#333',
-  },
-  rsvpButtons: {
+  rsvpRow: {
     flexDirection: 'row',
     gap: 12,
-    marginTop: 8,
+    marginTop: 4,
   },
   yesBtn: {
     backgroundColor: '#c5f1cf',
-    paddingHorizontal: 24,
-    paddingVertical: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     borderRadius: 20,
   },
   noBtn: {
     backgroundColor: '#f9bebe',
-    paddingHorizontal: 24,
-    paddingVertical: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     borderRadius: 20,
   },
-  rsvpText: {
-    fontWeight: 'bold',
-    color: '#222',
+  summaryCard: {
+    marginTop: 16,
+    padding: 16,
+    backgroundColor: '#f0fdf4',
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  summaryText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#333',
+    marginBottom: 4,
   },
 });

@@ -85,7 +85,7 @@ export const BucketList = () => {
               <View style={styles.imageWrapper}>
                 {item.Image && (
                   <Image
-                    source={require('../assets/images/bucketListImages/campingImage.jpg')}
+                  source={{ uri: 'https://www.letsroam.com/explorer/wp-content/uploads/sites/10/2023/05/best-whitewater-rafting-in-us.jpg' }} // use a direct image URL
                     style={styles.image}
                   />
                 )}
