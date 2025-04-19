@@ -49,6 +49,7 @@ export const Group = () => {
       <FlatList
         data={members}
         keyExtractor={(item) => item.id}
+        showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <View style={styles.card}>
             <Text style={styles.name}>{item.firstName} {item.lastName}</Text>
