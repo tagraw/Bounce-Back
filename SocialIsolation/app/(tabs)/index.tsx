@@ -4,7 +4,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { getAuth, signOut } from 'firebase/auth';
-import { getFirestore, collection, getDocs } from 'firebase/firestore';
+import { getFirestore, collection, getDocs, doc, getDoc} from 'firebase/firestore';
 import { useFocusEffect } from '@react-navigation/native';
 import { app } from '../../config/firebase';
 import { router } from 'expo-router';
@@ -20,11 +20,27 @@ export default function HomeScreen() {
   const totalSubtasks = bucketlist.reduce((sum, item) => sum + (item.Subtasks?.length || 0), 0);
   const totalCompleted = bucketlist.reduce((sum, item) => sum + (item.CompletedSubtasks?.length || 0), 0);
 
+  const fetchUserInfo = async (uid) => {
+    try {
+      const docRef = doc(db, 'users', uid); // 👈 reference to user doc
+      const docSnap = await getDoc(docRef);
+  
+      if (docSnap.exists()) {
+        const userData = docSnap.data();
+        setUserName(userData.firstName || 'User'); // 👈 use first name if it exists
+      } else {
+        console.log('No such user document!');
+      }
+    } catch (err) {
+      console.error('Error fetching user info:', err);
+    }
+  };
+
   useFocusEffect(
     useCallback(() => {
       const user = auth.currentUser;
       if (user) {
-        setUserName(user.email?.split('@')[0] || 'User');
+        fetchUserInfo(user.uid); // 👈 fetch Firestore user data
         fetchUserBucketList(user.uid);
       }
     }, [])

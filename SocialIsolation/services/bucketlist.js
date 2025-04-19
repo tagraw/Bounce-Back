@@ -16,6 +16,7 @@ export const BucketList = () => {
   const [bucketlist, setBucketlist] = useState([]);
   const [selectedItems, setSelectedItems] = useState(new Set());
   const [fontLoaded, setFontLoaded] = useState(false);
+  const [activeTab, setActiveTab] = useState('All');
 
   const user = getAuth(app).currentUser;
 
@@ -62,6 +63,11 @@ export const BucketList = () => {
     setSelectedItems((prev) => new Set(prev).add(item.id));
     router.push(`/bucketlist/${item.id}`);
   };
+  //test
+
+  const filteredBucketlist = activeTab === 'All'
+    ? bucketlist
+    : bucketlist.filter(item => item.Filters?.includes(activeTab));
 
   if (!fontLoaded) return <Text>Loading fonts...</Text>;
 
@@ -69,23 +75,23 @@ export const BucketList = () => {
     <ScrollView style={styles.container}>
       <Text style={styles.header}>Add to Your Bucket List</Text>
 
-      <View style={styles.tabs}>
-        <Text style={styles.tabActive}>All</Text>
-        <Text style={styles.tab}>Fitness</Text>
-        <Text style={styles.tab}>Mental Health</Text>
-        <Text style={styles.tab}>Social</Text>
-        <Text style={styles.tab}>Hobbies</Text>
+       <View style={styles.tabs}>
+        {['All', 'Fitness', 'Mental Health', 'Social', 'Hobbies'].map((tab) => (
+          <TouchableOpacity key={tab} onPress={() => setActiveTab(tab)}>
+            <Text style={activeTab === tab ? styles.tabActive : styles.tab}>{tab}</Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
       <View style={styles.grid}>
-        {bucketlist.map((item) => {
+        {filteredBucketlist.map((item) => {
           const isSelected = selectedItems.has(item.id);
           return (
             <View key={item.id} style={styles.card}>
               <View style={styles.imageWrapper}>
                 {item.Image && (
                   <Image
-                  source={{ uri: 'https://www.letsroam.com/explorer/wp-content/uploads/sites/10/2023/05/best-whitewater-rafting-in-us.jpg' }} // use a direct image URL
+                    source={{ uri: item.Image }}
                     style={styles.image}
                   />
                 )}
@@ -108,6 +114,7 @@ export const BucketList = () => {
     </ScrollView>
   );
 };
+
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - 64) / 3;
