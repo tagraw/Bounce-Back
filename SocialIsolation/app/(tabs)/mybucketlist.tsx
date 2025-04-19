@@ -55,7 +55,7 @@ export default function Index() {
             >
               {item.Image && (
                 <Image
-                  source={require('../../assets/images/bucketListImages/campingImage.jpg')}
+                  source={{ uri: item.Image }}
                   style={styles.image}
                 />
               )}

@@ -57,7 +57,7 @@ export default function MyBucketItemDetail() {
     <ScrollView style={styles.container}>
       {/* Header Image */}
       <ImageBackground
-        source={require('../../assets/images/bucketListImages/campingImage.jpg')}
+        source={{ uri: item.Image }}
         style={styles.headerImage}
       >
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
