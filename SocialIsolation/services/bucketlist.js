@@ -63,6 +63,7 @@ export const BucketList = () => {
     setSelectedItems((prev) => new Set(prev).add(item.id));
     router.push(`/bucketlist/${item.id}`);
   };
+  //test
 
   const filteredBucketlist = activeTab === 'All'
     ? bucketlist
