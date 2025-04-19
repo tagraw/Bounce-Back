@@ -85,6 +85,7 @@ export const BucketList = () => {
 
       <View style={styles.grid}>
         {filteredBucketlist.map((item) => {
+          console.log('Image URI for item:', item.Image);
           const isSelected = selectedItems.has(item.id);
           return (
             <View key={item.id} style={styles.card}>

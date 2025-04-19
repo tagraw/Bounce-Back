@@ -96,6 +96,8 @@ export default function HomeScreen() {
       <Text style={styles.sectionTitle}>Upcoming Events</Text>
 
       {bucketlist.map((item) => {
+        console.log('Image URI for item:', item.Image);
+
         const total = item.Subtasks?.length || 0;
         const completed = item.CompletedSubtasks?.length || 0;
         const isComplete = total > 0 && completed === total;
@@ -105,7 +107,7 @@ export default function HomeScreen() {
           <View key={item.id} style={[styles.card, isComplete && styles.cardComplete]}>
             <View style={styles.imageWrapper}>
               <Image
-                source={require('../../assets/images/bucketListImages/campingImage.jpg')}
+                source={{ uri: item.Image }}
                 style={styles.cardImage}
               />
               <View style={styles.cardOverlay} />

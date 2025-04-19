@@ -38,7 +38,12 @@ export default function Index() {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.header}>My Bucket List</Text>
+      <View style={styles.headerRow}>
+        <Text style={styles.header}>My Bucket List</Text>
+        <TouchableOpacity onPress={() => router.push('/addbucketitems')}>
+          <Text style={styles.plusButton}>＋</Text>
+        </TouchableOpacity>
+      </View>
 
       <View style={styles.cardContainer}>
         {bucketlist.length > 0 ? (
@@ -75,13 +80,27 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingHorizontal: 16,
   },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 50,
+    marginBottom: 25,
+  },
   header: {
     fontSize: 25,
     fontWeight: 'bold',
     fontFamily: 'Poppins_700Bold',
-    marginTop: 50,
-    marginBottom: 16,
     color: '#222',
+  },
+  plusButton: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: '#333',
+    paddingHorizontal: 10,
+  },
+  cardContainer: {
+    marginBottom: 20,
   },
   card: {
     width: '100%',
