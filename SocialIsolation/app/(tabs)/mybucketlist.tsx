@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    paddingTop: 20,
+    padding: 20,
     paddingHorizontal: 16,
   },
   headerRow: {
@@ -90,7 +90,6 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 25,
     fontWeight: 'bold',
-    fontFamily: 'Poppins_700Bold',
     color: '#222',
   },
   plusButton: {

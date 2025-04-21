@@ -86,7 +86,7 @@ export default function BucketListDetail() {
     <View style={styles.container}>
       {/* Image header (replace with item.Image later) */}
       <Image
-        source={require('../../assets/images/bucketListImages/campingImage.jpg')}
+        source={{ uri: item.Image }}
         style={styles.image}
         resizeMode="cover"
       />
