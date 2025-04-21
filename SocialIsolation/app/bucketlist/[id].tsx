@@ -4,11 +4,10 @@ import {
   TouchableOpacity, Dimensions, Alert
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
-import { getFirestore, doc, getDoc, collection, addDoc } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 import { app } from '../../config/firebase';
 import { getAuth } from 'firebase/auth';
 import { useRouter } from 'expo-router';
-
 
 export const unstable_settings = {
   initialRouteName: 'index',
@@ -24,6 +23,7 @@ export default function BucketListDetail() {
   const db = getFirestore(app);
   const auth = getAuth(app);
   const [item, setItem] = useState(null);
+  const [isAdding, setIsAdding] = useState(false); // Track if the item is being added
   const router = useRouter();
 
   useEffect(() => {
@@ -42,21 +42,41 @@ export default function BucketListDetail() {
 
   const handleAddToMyList = async () => {
     const user = auth.currentUser;
-    if (!user || !item) return;
+    if (!user || !item || isAdding) return; // Don't allow adding if already in progress
+
+    // setIsAdding(true); // Set loading state
 
     try {
       const userBucketListRef = collection(db, 'users', user.uid, 'bucketlist');
+      // Check if the item is already in the user's bucket list
+      const q = query(userBucketListRef, where('Name', '==', item.Name));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        // If the item is already in the user's list, navigate to the main page
+        // Alert.alert('✔️ Already in your list', 'This item is already in your bucket list.');
+        // Alert.alert('❌ Already in your list', 'This item is already in your bucket list.');
+        Alert.alert('✅ Added!', 'Item added to your bucket list.');
+        router.push('/addbucketitems');
+        setIsAdding(false);
+        return; // Item already in list, do not add again
+      }
+
+      // If not found, add the item to the list
       await addDoc(userBucketListRef, {
         Name: item.Name,
         Image: item.Image || null,
         Subtasks: item.Subtasks || [],
         createdAt: new Date(),
       });
-      Alert.alert('✅ Added!', 'Item added to your bucket list.');
-      router.push('/addbucketitems');
+
+      // Alert.alert('✅ Added!', 'Item added to your bucket list.');
+      // router.push('/addbucketitems'); // Navigate to the main page
     } catch (error) {
       console.error('Error adding item:', error);
       Alert.alert('❌ Error', 'Could not add to your list.');
+    } finally {
+      setIsAdding(false); // Reset loading state
     }
   };
 
@@ -87,8 +107,12 @@ export default function BucketListDetail() {
       )}
 
       {/* Add button */}
-      <TouchableOpacity onPress={handleAddToMyList} style={styles.button}>
-        <Text style={styles.buttonText}>Add to My Bucket List</Text>
+      <TouchableOpacity
+        onPress={handleAddToMyList}
+        style={[styles.button, isAdding && { backgroundColor: '#E0E0E0' }]} // Optional: change color when loading
+        disabled={isAdding} // Disable button while loading
+      >
+        <Text style={styles.buttonText}>{isAdding ? 'Adding...' : 'Add to My Bucket List'}</Text>
       </TouchableOpacity>
     </View>
   );
