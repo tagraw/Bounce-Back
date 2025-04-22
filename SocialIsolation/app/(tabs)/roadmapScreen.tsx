@@ -10,7 +10,7 @@ import { app } from '../../config/firebase';
 const windowWidth = Dimensions.get('window').width;
 const scale = windowWidth / 393;
 
-export default function RoadmapScreen() {
+export default function Roadmap() {
   const auth = getAuth(app);
   const db = getFirestore(app);
   const [completedCount, setCompletedCount] = useState(0);

@@ -42,15 +42,6 @@ export default function TabLayout() {
           ),
         }}
       />
-      {/* <Tabs.Screen
-        name="addbucketitems"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color, focused }: BottomTabBarIconProps) => (
-            <Ionicons name={focused ? 'add-circle' : 'add-circle-outline'} color={color} size={22} />
-          ),
-        }}
-      /> */}
       <Tabs.Screen
         name="mybucketlist"
         options={{
@@ -69,16 +60,6 @@ export default function TabLayout() {
           ),
         }}
       />
-      {/* <Tabs.Screen
-        name="singularbucketitem"
-        options={{
-          title: 'Track',
-          tabBarIcon: ({ color, focused }: BottomTabBarIconProps) => (
-            <Ionicons name={focused ? 'bar-chart' : 'bar-chart-outline'} color={color} size={22} />
-          ),
-          tabBarButton: () => null, // Hide from tab bar navigation
-        }}
-      /> */}
     </Tabs>
   );
 }

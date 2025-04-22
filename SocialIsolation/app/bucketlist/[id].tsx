@@ -3,66 +3,59 @@ import {
   View, Text, StyleSheet, Image, FlatList,
   TouchableOpacity, Dimensions, Alert
 } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 import { app } from '../../config/firebase';
 import { getAuth } from 'firebase/auth';
-import { useRouter } from 'expo-router';
 
-export const unstable_settings = {
-  initialRouteName: 'index',
-};
-
-export const navigationOptions = {
-  tabBarStyle: { display: 'none' },
-  tabBarButton: () => null,
+type BucketListItem = {
+  id: string;
+  Name: string;
+  Image?: string;
+  Subtasks?: string[];
 };
 
 export default function BucketListDetail() {
-  const { id } = useLocalSearchParams();
+  const { id } = useLocalSearchParams<{ id: string }>();
   const db = getFirestore(app);
   const auth = getAuth(app);
-  const [item, setItem] = useState(null);
-  const [isAdding, setIsAdding] = useState(false); // Track if the item is being added
   const router = useRouter();
+
+  const [item, setItem] = useState<BucketListItem | null>(null);
+  const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => {
     const fetchItem = async () => {
+      if (!id) return;
       const docRef = doc(db, 'bucketlist', id);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        setItem({ id: docSnap.id, ...docSnap.data() });
+        setItem({ id: docSnap.id, ...docSnap.data() } as BucketListItem);
       } else {
         console.warn('No such document!');
       }
     };
 
-    if (id) fetchItem();
+    fetchItem();
   }, [id]);
 
   const handleAddToMyList = async () => {
     const user = auth.currentUser;
-    if (!user || !item || isAdding) return; // Don't allow adding if already in progress
-
-    // setIsAdding(true); // Set loading state
+    if (!user || !item || isAdding) return;
+    setIsAdding(true);
 
     try {
       const userBucketListRef = collection(db, 'users', user.uid, 'bucketlist');
-      // Check if the item is already in the user's bucket list
       const q = query(userBucketListRef, where('Name', '==', item.Name));
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
-        // If the item is already in the user's list, navigate to the main page
-        // Alert.alert('✔️ Already in your list', 'This item is already in your bucket list.');
-        // Alert.alert('❌ Already in your list', 'This item is already in your bucket list.');
-        Alert.alert('✅ Added!', 'Item added to your bucket list.');
+        Alert.alert('✅ Added!', 'Item already exists in your bucket list.');
         router.push('/addbucketitems');
         setIsAdding(false);
-        return; // Item already in list, do not add again
+        return;
       }
 
-      // If not found, add the item to the list
       await addDoc(userBucketListRef, {
         Name: item.Name,
         Image: item.Image || null,
@@ -70,13 +63,13 @@ export default function BucketListDetail() {
         createdAt: new Date(),
       });
 
-      // Alert.alert('✅ Added!', 'Item added to your bucket list.');
-      // router.push('/addbucketitems'); // Navigate to the main page
+      Alert.alert('✅ Added!', 'Item added to your bucket list.');
+      router.push('/addbucketitems');
     } catch (error) {
       console.error('Error adding item:', error);
       Alert.alert('❌ Error', 'Could not add to your list.');
     } finally {
-      setIsAdding(false); // Reset loading state
+      setIsAdding(false);
     }
   };
 
@@ -84,36 +77,39 @@ export default function BucketListDetail() {
 
   return (
     <View style={styles.container}>
-      {/* Image header (replace with item.Image later) */}
+      {/* Full-width image without padding */}
       <Image
         source={{ uri: item.Image }}
         style={styles.image}
         resizeMode="cover"
       />
 
-      {/* Title */}
-      <Text style={styles.title}>{item.Name}</Text>
+      {/* Rest of the content with padding */}
+      <View style={styles.content}>
+        <Text style={styles.title}>{item.Name}</Text>
 
-      {/* Subtasks */}
-      <Text style={styles.subheading}>Subtasks</Text>
-      {item.Subtasks?.length > 0 ? (
-        <FlatList
-          data={item.Subtasks}
-          keyExtractor={(task, index) => index.toString()}
-          renderItem={({ item }) => <Text style={styles.subtask}>• {item}</Text>}
-        />
-      ) : (
-        <Text style={styles.subtask}>No subtasks listed.</Text>
-      )}
-
-      {/* Add button */}
+        <Text style={styles.subheading}>Subtasks</Text>
+        {(item.Subtasks?.length ?? 0) > 0 ? (
+          <FlatList
+            data={item.Subtasks}
+            keyExtractor={(task, index) => index.toString()}
+            renderItem={({ item: task }) => (
+              <Text style={styles.subtask}>• {task}</Text>
+            )}
+          />
+        ) : (
+          <Text style={styles.subtask}>No subtasks listed.</Text>
+        )}
+      </View>
       <TouchableOpacity
-        onPress={handleAddToMyList}
-        style={[styles.button, isAdding && { backgroundColor: '#E0E0E0' }]} // Optional: change color when loading
-        disabled={isAdding} // Disable button while loading
-      >
-        <Text style={styles.buttonText}>{isAdding ? 'Adding...' : 'Add to My Bucket List'}</Text>
-      </TouchableOpacity>
+          onPress={handleAddToMyList}
+          style={[styles.button, isAdding && { backgroundColor: '#E0E0E0' }]}
+          disabled={isAdding}
+        >
+          <Text style={styles.buttonText}>
+            {isAdding ? 'Adding...' : 'Add to My Bucket List'}
+          </Text>
+        </TouchableOpacity>
     </View>
   );
 }
@@ -122,9 +118,11 @@ const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
     backgroundColor: '#fff',
     flex: 1,
+  },
+  content: {
+    padding: 20,
   },
   loading: {
     padding: 20,
@@ -134,8 +132,6 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: 220,
-    borderRadius: 20,
-    marginBottom: 20,
   },
   title: {
     fontSize: 24,
@@ -158,13 +154,14 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins_400Regular',
   },
   button: {
+    position: 'absolute',
+    bottom: 100,
+    left: 50,
+    right: 50,
     backgroundColor: '#FBD5D5',
     paddingVertical: 14,
-    paddingHorizontal: 30,
     borderRadius: 30,
-    marginTop: 24,
     alignItems: 'center',
-    alignSelf: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.1,

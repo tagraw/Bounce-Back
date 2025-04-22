@@ -4,15 +4,28 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { getAuth, signOut } from 'firebase/auth';
-import { getFirestore, collection, getDocs, doc, getDoc} from 'firebase/firestore';
+import { getFirestore, collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import { useFocusEffect } from '@react-navigation/native';
 import { app } from '../../config/firebase';
 import { router } from 'expo-router';
 
+type BucketListItem = {
+  id: string;
+  Name?: string;
+  Date?: string;
+  Time?: string;
+  Location?: string;
+  Description?: string;
+  Image?: string;
+  Subtasks?: string[];
+  CompletedSubtasks?: string[];
+  Attendees?: string[];
+};
+
 export default function HomeScreen() {
   const [userName, setUserName] = useState('');
-  const [bucketlist, setBucketlist] = useState([]);
-  const [expandedIds, setExpandedIds] = useState(new Set());
+  const [bucketlist, setBucketlist] = useState<BucketListItem[]>([]);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
   const auth = getAuth(app);
   const db = getFirestore(app);
@@ -20,14 +33,14 @@ export default function HomeScreen() {
   const totalSubtasks = bucketlist.reduce((sum, item) => sum + (item.Subtasks?.length || 0), 0);
   const totalCompleted = bucketlist.reduce((sum, item) => sum + (item.CompletedSubtasks?.length || 0), 0);
 
-  const fetchUserInfo = async (uid) => {
+  const fetchUserInfo = async (uid: string) => {
     try {
-      const docRef = doc(db, 'users', uid); // 👈 reference to user doc
+      const docRef = doc(db, 'users', uid);
       const docSnap = await getDoc(docRef);
-  
+
       if (docSnap.exists()) {
         const userData = docSnap.data();
-        setUserName(userData.firstName || 'User'); // 👈 use first name if it exists
+        setUserName(userData.firstName || 'User');
       } else {
         console.log('No such user document!');
       }
@@ -40,19 +53,19 @@ export default function HomeScreen() {
     useCallback(() => {
       const user = auth.currentUser;
       if (user) {
-        fetchUserInfo(user.uid); // 👈 fetch Firestore user data
+        fetchUserInfo(user.uid);
         fetchUserBucketList(user.uid);
       }
     }, [])
   );
 
-  const fetchUserBucketList = async (uid) => {
+  const fetchUserBucketList = async (uid: string) => {
     try {
       const ref = collection(db, 'users', uid, 'bucketlist');
       const snapshot = await getDocs(ref);
-      const items = snapshot.docs.map((doc) => ({
+      const items: BucketListItem[] = snapshot.docs.map(doc => ({
         id: doc.id,
-        ...doc.data(),
+        ...doc.data()
       }));
       setBucketlist(items);
     } catch (err) {
@@ -60,8 +73,8 @@ export default function HomeScreen() {
     }
   };
 
-  const toggleExpand = (id) => {
-    setExpandedIds((prev) => {
+  const toggleExpand = (id: string) => {
+    setExpandedIds(prev => {
       const updated = new Set(prev);
       updated.has(id) ? updated.delete(id) : updated.add(id);
       return updated;
@@ -79,7 +92,6 @@ export default function HomeScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <View>
           <Text style={styles.greeting}>Welcome Back,</Text>
@@ -96,8 +108,6 @@ export default function HomeScreen() {
       <Text style={styles.sectionTitle}>Upcoming Events</Text>
 
       {bucketlist.map((item) => {
-        console.log('Image URI for item:', item.Image);
-
         const total = item.Subtasks?.length || 0;
         const completed = item.CompletedSubtasks?.length || 0;
         const isComplete = total > 0 && completed === total;
@@ -106,13 +116,11 @@ export default function HomeScreen() {
         return (
           <View key={item.id} style={[styles.card, isComplete && styles.cardComplete]}>
             <View style={styles.imageWrapper}>
-              <Image
-                source={{ uri: item.Image }}
-                style={styles.cardImage}
-              />
+              {item.Image && (
+                <Image source={{ uri: item.Image }} style={styles.cardImage} />
+              )}
               <View style={styles.cardOverlay} />
 
-              {/* Expand arrow */}
               <TouchableOpacity onPress={() => toggleExpand(item.id)} style={styles.arrow}>
                 <Ionicons
                   name="chevron-down"
@@ -124,7 +132,7 @@ export default function HomeScreen() {
 
               <View style={styles.cardContent}>
                 <Text style={styles.cardTitle}>{item.Name}</Text>
-                <Text style={styles.cardSubtext}>{item.Date} • {item.Time}</Text>
+                <Text style={styles.cardSubtext}>{item.Date} {item.Time}</Text>
                 <Text style={styles.cardSubtext}>{item.Location}</Text>
               </View>
             </View>
@@ -136,11 +144,15 @@ export default function HomeScreen() {
 
                 <Text style={styles.expandedTitle}>Who's Attending</Text>
                 <View style={styles.attendeesRow}>
-                  {(item.Attendees || []).map((name, i) => (
-                    <View key={i} style={styles.attendeeBubble}>
-                      <Text>{name}</Text>
-                    </View>
-                  ))}
+                  {(item.Attendees && item.Attendees.length > 0) ? (
+                    item.Attendees.map((name, i) => (
+                      <View key={i} style={styles.attendeeBubble}>
+                        <Text>{name}</Text>
+                      </View>
+                    ))
+                  ) : (
+                    <Text style={styles.placeholderText}>No one has RSVPed yet.</Text>
+                  )}
                 </View>
 
                 <Text style={styles.expandedTitle}>RSVP</Text>
@@ -271,6 +283,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 20,
+  },
+  placeholderText: {
+    fontSize: 13,
+    color: '#999',
+    fontStyle: 'italic',
   },
   rsvpRow: {
     flexDirection: 'row',
