@@ -50,7 +50,7 @@ export default function BucketListDetail() {
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
-        Alert.alert('✅ Added!', 'Item already exists in your bucket list.');
+        Alert.alert('✅ Added!', 'Item added to your bucket list.');
         router.push('/addbucketitems');
         setIsAdding(false);
         return;
