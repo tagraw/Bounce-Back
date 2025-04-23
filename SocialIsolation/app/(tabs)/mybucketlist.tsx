@@ -6,6 +6,8 @@ import { useRouter } from 'expo-router';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, collection, onSnapshot } from 'firebase/firestore';
 import { app } from '../../config/firebase';
+import * as Font from 'expo-font';
+
 
 type BucketItem = {
   id: string;
@@ -42,13 +44,24 @@ export default function Index() {
     return () => unsubscribe();
   }, []);
 
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+
+    const loadFonts = async () => {
+      await Font.loadAsync({
+        'Fredoka': require('../../assets/fonts/Fredoka-VariableFont_wdth,wght.ttf'),
+      });
+      setFontsLoaded(true);
+    };
+
+    useEffect(() => {
+      loadFonts();
+    }, []);
+
   return (
+    <View style={{ flex: 1 }}>
     <ScrollView style={styles.container}>
       <View style={styles.headerRow}>
-        <Text style={styles.header}>My Bucket List</Text>
-        <TouchableOpacity onPress={() => router.push('/addbucketitems')}>
-          <Text style={styles.plusButton}>＋</Text>
-        </TouchableOpacity>
+        <Text style={styles.header}>My Bucket List Groups</Text>
       </View>
 
       <View style={styles.cardContainer}>
@@ -68,11 +81,21 @@ export default function Index() {
               <Text style={styles.cardTitle}>{item.Name}</Text>
             </TouchableOpacity>
           ))
+          
         ) : (
           <Text style={styles.emptyText}>No items yet.</Text>
         )}
       </View>
     </ScrollView>
+
+     {/* Floating Plus Button */}
+     <TouchableOpacity
+     style={styles.floatingButton}
+     onPress={() => router.push('/addbucketitems')}
+   >
+     <Text style={styles.plusButton}>＋</Text>
+   </TouchableOpacity>
+ </View>
   );
 }
 
@@ -94,6 +117,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   header: {
+    fontFamily: 'Fredoka',
     fontSize: 25,
     fontWeight: 'bold',
     color: '#222',
@@ -101,8 +125,21 @@ const styles = StyleSheet.create({
   plusButton: {
     fontSize: 26,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#fff',
     paddingHorizontal: 10,
+  },
+  floatingButton: {
+    position: 'absolute',
+    bottom: 30,
+    alignSelf: 'center',
+    backgroundColor: '#7b7b7b',
+   borderRadius: 30,
+    padding: 10,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   cardContainer: {
     marginBottom: 20,
