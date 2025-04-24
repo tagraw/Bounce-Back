@@ -12,8 +12,16 @@ import { getAuth } from 'firebase/auth';
 import { app } from '../../config/firebase';
 import { Ionicons } from '@expo/vector-icons';
 
+// ✅ Define type for bucket list item
+interface BucketListItem {
+  Name?: string;
+  Image?: string;
+  Subtasks?: string[];
+  CompletedSubtasks?: string[];
+}
+
 export default function MyBucketItemDetail() {
-  const { id } = useLocalSearchParams();
+  const { id } = useLocalSearchParams<{ id: string }>();
   const db = getFirestore(app);
   const auth = getAuth(app);
   const user = auth.currentUser;
@@ -36,7 +44,7 @@ export default function MyBucketItemDetail() {
       const ref = doc(db, 'users', user.uid, 'bucketlist', id);
       const snap = await getDoc(ref);
       if (snap.exists()) {
-        const data = snap.data();
+        const data = snap.data() as BucketListItem;
         setItem(data);
         setCompleted(data.CompletedSubtasks || []);
       }
@@ -95,7 +103,7 @@ export default function MyBucketItemDetail() {
       : [...completed, taskName];
 
     setCompleted(updated);
-    const ref = doc(db, 'users', user.uid, 'bucketlist', id);
+    const ref = doc(db, 'users', user!.uid, 'bucketlist', id);
     try {
       await updateDoc(ref, { CompletedSubtasks: updated });
     } catch (err) {
@@ -108,13 +116,13 @@ export default function MyBucketItemDetail() {
   const total = item.Subtasks?.length || 0;
 
   const done = completed.length;
-  const progress = done / total;
+  const progress = total === 0 ? 0 : done / total;
 
   return (
     <ScrollView style={styles.container}>
       {/* Header Image */}
       <ImageBackground
-        source={require('../../assets/images/bucketListImages/campingImage.jpg')}
+        source={{ uri: item.Image }}
         style={styles.headerImage}
       >
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
@@ -135,18 +143,19 @@ export default function MyBucketItemDetail() {
         <Text style={styles.sectionTitle}>Activities</Text>
         <View style={styles.tasksWrapper}>
           {item.Subtasks?.map((taskName, index) => (
-            <View key={index} style={styles.card}>
+            <TouchableOpacity
+              key={index}
+              style={styles.card}
+              onPress={() => toggleSubtask(taskName)}
+              activeOpacity={0.8}
+            >
               <Text style={[
                 styles.taskText,
                 completed.includes(taskName) && styles.completedText
               ]}>
                 {taskName}
               </Text>
-              <Switch
-                value={completed.includes(taskName)}
-                onValueChange={() => toggleSubtask(taskName)}
-              />
-            </View>
+            </TouchableOpacity>
           ))}
         </View>
       </View>
@@ -155,7 +164,7 @@ export default function MyBucketItemDetail() {
 }
 
 const { width } = Dimensions.get('window');
-const CARD_WIDTH = (width - 60) / 2;
+const CARD_WIDTH = (width - 70) / 2;
 
 const styles = StyleSheet.create({
   container: {
@@ -165,25 +174,30 @@ const styles = StyleSheet.create({
   headerImage: {
     height: 250,
     width: '100%',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.3)',
     justifyContent: 'flex-end',
+    padding: 16,
   },
   backButton: {
     position: 'absolute',
     top: 50,
     left: 20,
     zIndex: 10,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(0,0,0,0.3)',
     padding: 6,
     borderRadius: 20,
   },
-  overlay: {
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    padding: 16,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-  },
   title: {
-    fontSize: 22,
+    fontSize: 30,
     color: '#fff',
     fontWeight: 'bold',
     marginBottom: 4,
@@ -191,17 +205,17 @@ const styles = StyleSheet.create({
   subtitle: {
     color: '#fff',
     marginBottom: 8,
+    fontSize: 15,
   },
   progressBar: {
-    height: 6,
+    height: 20,
     width: '100%',
     backgroundColor: '#ccc',
-    borderRadius: 3,
+    overflow: 'hidden',
   },
   progressFill: {
-    height: 6,
+    height: '100%',
     backgroundColor: '#6cc070',
-    borderRadius: 3,
   },
   content: {
     padding: 20,
@@ -217,18 +231,17 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   card: {
-    backgroundColor: '#FBD5D5',
+    backgroundColor: '#E6A1A1',
     width: CARD_WIDTH,
-    padding: 16,
+    height: CARD_WIDTH,
+    padding: 15,
     borderRadius: 12,
     marginBottom: 16,
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
   },
   taskText: {
     fontSize: 14,
-    fontWeight: 'bold',
-    marginBottom: 8,
+    color: '#fff',
   },
   completedText: {
     textDecorationLine: 'line-through',

@@ -3,60 +3,73 @@ import {
   View, Text, StyleSheet, Image, FlatList,
   TouchableOpacity, Dimensions, Alert
 } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
-import { getFirestore, doc, getDoc, collection, addDoc } from 'firebase/firestore';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 import { app } from '../../config/firebase';
 import { getAuth } from 'firebase/auth';
-import { useRouter } from 'expo-router';
 
-
-export const unstable_settings = {
-  initialRouteName: 'index',
-};
-
-export const navigationOptions = {
-  tabBarStyle: { display: 'none' },
-  tabBarButton: () => null,
+type BucketListItem = {
+  id: string;
+  Name: string;
+  Image?: string;
+  Subtasks?: string[];
 };
 
 export default function BucketListDetail() {
-  const { id } = useLocalSearchParams();
+  const { id } = useLocalSearchParams<{ id: string }>();
   const db = getFirestore(app);
   const auth = getAuth(app);
-  const [item, setItem] = useState(null);
   const router = useRouter();
+
+  const [item, setItem] = useState<BucketListItem | null>(null);
+  const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => {
     const fetchItem = async () => {
+      if (!id) return;
       const docRef = doc(db, 'bucketlist', id);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        setItem({ id: docSnap.id, ...docSnap.data() });
+        setItem({ id: docSnap.id, ...docSnap.data() } as BucketListItem);
       } else {
         console.warn('No such document!');
       }
     };
 
-    if (id) fetchItem();
+    fetchItem();
   }, [id]);
 
   const handleAddToMyList = async () => {
     const user = auth.currentUser;
-    if (!user || !item) return;
+    if (!user || !item || isAdding) return;
+    setIsAdding(true);
 
     try {
       const userBucketListRef = collection(db, 'users', user.uid, 'bucketlist');
+      const q = query(userBucketListRef, where('Name', '==', item.Name));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        Alert.alert('✅ Added!', 'Item added to your bucket list.');
+        router.push('/addbucketitems');
+        setIsAdding(false);
+        return;
+      }
+
       await addDoc(userBucketListRef, {
         Name: item.Name,
         Image: item.Image || null,
         Subtasks: item.Subtasks || [],
         createdAt: new Date(),
       });
+
       Alert.alert('✅ Added!', 'Item added to your bucket list.');
       router.push('/addbucketitems');
     } catch (error) {
       console.error('Error adding item:', error);
       Alert.alert('❌ Error', 'Could not add to your list.');
+    } finally {
+      setIsAdding(false);
     }
   };
 
@@ -65,17 +78,18 @@ export default function BucketListDetail() {
 
   return (
     <View style={styles.container}>
-      {/* Image header (replace with item.Image later) */}
+      {/* Full-width image without padding */}
       <Image
-        source={require('../../assets/images/bucketListImages/campingImage.jpg')}
+        source={{ uri: item.Image }}
         style={styles.image}
         resizeMode="cover"
       />
 
-      {/* Title */}
-      <Text style={styles.title}>{item.Name}</Text>
+      {/* Rest of the content with padding */}
+      <View style={styles.content}>
+        <Text style={styles.title}>{item.Name}</Text>
 
-    
+      {/* Subtasks */}
       <Text style={styles.subheading}>Subtasks</Text>
       {item.Subtasks?.length > 0 ? (
         <FlatList
@@ -99,9 +113,11 @@ const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
     backgroundColor: '#fff',
     flex: 1,
+  },
+  content: {
+    padding: 20,
   },
   loading: {
     padding: 20,
@@ -111,8 +127,6 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: 220,
-    borderRadius: 20,
-    marginBottom: 20,
   },
   title: {
     fontSize: 24,
@@ -135,13 +149,14 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins_400Regular',
   },
   button: {
+    position: 'absolute',
+    bottom: 100,
+    left: 50,
+    right: 50,
     backgroundColor: '#FBD5D5',
     paddingVertical: 14,
-    paddingHorizontal: 30,
     borderRadius: 30,
-    marginTop: 24,
     alignItems: 'center',
-    alignSelf: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.1,

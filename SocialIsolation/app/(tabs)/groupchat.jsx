@@ -1,8 +1,3 @@
-// app/(tabs)/ChatScreen.jsx
-// **Install dependencies**:
-// npm install firebase
-// expo install expo-image-picker expo-camera expo-permissions @expo/vector-icons
-
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
