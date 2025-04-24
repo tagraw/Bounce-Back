@@ -62,6 +62,7 @@ export default function BucketListDetail() {
 
   if (!item) return <Text style={styles.loading}>Loading...</Text>;
 
+
   return (
     <View style={styles.container}>
       {/* Image header (replace with item.Image later) */}
@@ -74,7 +75,7 @@ export default function BucketListDetail() {
       {/* Title */}
       <Text style={styles.title}>{item.Name}</Text>
 
-      {/* Subtasks */}
+    
       <Text style={styles.subheading}>Subtasks</Text>
       {item.Subtasks?.length > 0 ? (
         <FlatList

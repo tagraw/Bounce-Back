@@ -11,9 +11,12 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "We need access to your location to recommend nearby events"
+        "NSLocationWhenInUseUsageDescription": "We need access to your location to recommend nearby events",
+        "NSCameraUsageDescription": "Allow taking photos to send in chat",
+            "NSPhotoLibraryUsageDescription": "Allow selecting photos for upload"
       }
     },
+    
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",

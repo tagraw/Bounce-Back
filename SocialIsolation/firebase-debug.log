@@ -1,0 +1,14 @@
+[debug] [2025-04-22T22:57:23.895Z] ----------------------------------------------------------------------
+[debug] [2025-04-22T22:57:23.901Z] Command:       /usr/local/bin/node /usr/local/bin/firebase emulators:start
+[debug] [2025-04-22T22:57:23.902Z] CLI Version:   14.2.0
+[debug] [2025-04-22T22:57:23.902Z] Platform:      darwin
+[debug] [2025-04-22T22:57:23.902Z] Node Version:  v22.13.1
+[debug] [2025-04-22T22:57:23.903Z] Time:          Tue Apr 22 2025 17:57:23 GMT-0500 (Central Daylight Time)
+[debug] [2025-04-22T22:57:23.904Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-04-22T22:57:23.906Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2025-04-22T22:57:23.956Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] Failed to authenticate, have you run firebase login?
+[warn] ⚠  emulators: You are not currently authenticated so some features may not work correctly. Please run firebase login to authenticate the CLI. 
+[error] 
+[error] Error: Not in a Firebase app directory (could not locate firebase.json)

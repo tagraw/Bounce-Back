@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import {
   View, Text, StyleSheet, Switch, ImageBackground, Dimensions,
-  ScrollView, TouchableOpacity
+  ScrollView, TouchableOpacity,
+  Alert,
+  Platform,
+  Modal
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getFirestore, doc, getDoc, updateDoc } from 'firebase/firestore';
@@ -18,8 +21,16 @@ export default function MyBucketItemDetail() {
 
   const [item, setItem] = useState(null);
   const [completed, setCompleted] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+
+
+  const areAllSubtasksCompleted = () => {
+    return item?.Subtasks?.length > 0 && completed.length === item.Subtasks.length;
+  };
+  
 
   useEffect(() => {
+  
     const fetchItem = async () => {
       if (!user || !id) return;
       const ref = doc(db, 'users', user.uid, 'bucketlist', id);
@@ -32,6 +43,51 @@ export default function MyBucketItemDetail() {
     };
     fetchItem();
   }, [id]);
+
+  useEffect(() => {
+    if (areAllSubtasksCompleted()) {
+      setShowModal(true);
+      
+    }
+  }, [completed, item]);
+
+  if(showModal){
+    return(    
+      <View style={{ flex: 1 }}>
+        <Modal isVisible={showModal}>
+          <View style={{
+            backgroundColor: 'white',
+            padding: 20,
+            borderRadius: 12,
+            alignItems: 'center'
+          }}>
+            <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>
+              Congratulations!
+            </Text>
+            <Text style={{ marginBottom: 20 }}>
+              You've completed all subtasks! Share your success!
+            </Text>
+            <TouchableOpacity
+              style={{ padding: 10, backgroundColor: '#6cc070', borderRadius: 8 }}
+              onPress={() => {
+                router.push('/(tabs)/groupchat')
+                setShowModal(false);
+              }}
+            >
+              <Text style={{ color: 'white', fontWeight: 'bold' }}>Share Now</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{ marginTop: 10 }}
+              onPress={() => setShowModal(false)}
+            >
+              <Text style={{ color: '#999' }}>Maybe Later</Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
+      </View>
+    );
+  }
+
 
   const toggleSubtask = async (taskName) => {
     const updated = completed.includes(taskName)
@@ -50,6 +106,7 @@ export default function MyBucketItemDetail() {
   if (!item) return <Text style={{ padding: 20 }}>Loading...</Text>;
 
   const total = item.Subtasks?.length || 0;
+
   const done = completed.length;
   const progress = done / total;
 
