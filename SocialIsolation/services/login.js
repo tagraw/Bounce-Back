@@ -30,7 +30,6 @@ export const Login = () => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       console.log('User signed in successfully:', userCredential.user);
-      // Alert.alert('Success', 'User signed in successfully!');
     } catch (error) {
       console.error('Error signing in:', error);
       Alert.alert('Error', 'Invalid credentials.');

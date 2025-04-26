@@ -1,4 +1,4 @@
-import { Group } from '../../services/groupmembers';
+import { Group } from '../services/groupmembers';
 
 export default function Index() {
   return (

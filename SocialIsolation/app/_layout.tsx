@@ -59,9 +59,9 @@ export default function RootLayout() {
         case 'not-logged-in':
           router.replace('/(auth)/login');
           break;
-        case 'no-group':
-          router.replace('/(auth)/selectgroup');
-          break;
+        // case 'no-group':
+        //   router.replace('/(auth)/selectgroup');
+        //   break;
         case 'has-group':
           router.replace('/(tabs)');
           break;

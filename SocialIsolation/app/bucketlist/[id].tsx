@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View, Text, StyleSheet, Image, FlatList,
-  TouchableOpacity, Dimensions, Alert
+  View, Text, StyleSheet, Image, FlatList, TouchableOpacity, Dimensions, Alert,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs } from 'firebase/firestore';
+import {
+  getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs,
+} from 'firebase/firestore';
 import { app } from '../../config/firebase';
 import { getAuth } from 'firebase/auth';
 
@@ -30,7 +31,7 @@ export default function BucketListDetail() {
       const docRef = doc(db, 'bucketlist', id);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        setItem({ id: docSnap.id, ...docSnap.data() } as BucketListItem);
+        setItem({ ...(docSnap.data() as BucketListItem), id: docSnap.id });
       } else {
         console.warn('No such document!');
       }
@@ -50,9 +51,8 @@ export default function BucketListDetail() {
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
-        Alert.alert('✅ Added!', 'Item added to your bucket list.');
+        Alert.alert('✅ Added!', 'Item already in your bucket list.');
         router.push('/addbucketitems');
-        setIsAdding(false);
         return;
       }
 
@@ -73,38 +73,40 @@ export default function BucketListDetail() {
     }
   };
 
-  if (!item) return <Text style={styles.loading}>Loading...</Text>;
-
+  if (!item) {
+    return <Text style={styles.loading}>Loading...</Text>;
+  }
 
   return (
     <View style={styles.container}>
-      {/* Full-width image without padding */}
-      <Image
-        source={{ uri: item.Image }}
-        style={styles.image}
-        resizeMode="cover"
-      />
+      <Image source={{ uri: item.Image }} style={styles.image} resizeMode="cover" />
 
-      {/* Rest of the content with padding */}
       <View style={styles.content}>
         <Text style={styles.title}>{item.Name}</Text>
 
-      {/* Subtasks */}
-      <Text style={styles.subheading}>Subtasks</Text>
-      {item.Subtasks?.length > 0 ? (
-        <FlatList
-          data={item.Subtasks}
-          keyExtractor={(task, index) => index.toString()}
-          renderItem={({ item }) => <Text style={styles.subtask}>• {item}</Text>}
-        />
-      ) : (
-        <Text style={styles.subtask}>No subtasks listed.</Text>
-      )}
+        <Text style={styles.subheading}>Subtasks</Text>
+        {item.Subtasks && item.Subtasks.length > 0 ? (
+          <FlatList
+            data={item.Subtasks}
+            keyExtractor={(_, idx) => idx.toString()}
+            renderItem={({ item: task }) => (
+              <Text style={styles.subtask}>• {task}</Text>
+            )}
+          />
+        ) : (
+          <Text style={styles.subtask}>No subtasks listed.</Text>
+        )}
 
-      {/* Add button */}
-      <TouchableOpacity onPress={handleAddToMyList} style={styles.button}>
-        <Text style={styles.buttonText}>Add to My Bucket List</Text>
-      </TouchableOpacity>
+        <TouchableOpacity
+          onPress={handleAddToMyList}
+          style={styles.button}
+          disabled={isAdding}
+        >
+          <Text style={styles.buttonText}>
+            {isAdding ? 'Adding...' : 'Add to My Bucket List'}
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -118,6 +120,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 20,
+    paddingTop: 10,
   },
   loading: {
     padding: 20,
@@ -149,10 +152,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins_400Regular',
   },
   button: {
-    position: 'absolute',
-    bottom: 100,
-    left: 50,
-    right: 50,
+    marginTop: 20,
     backgroundColor: '#FBD5D5',
     paddingVertical: 14,
     borderRadius: 30,

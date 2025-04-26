@@ -73,7 +73,7 @@ export const Signup = () => {
       });
 
       // Alert.alert('Success', 'User signed up successfully!');
-      router.push('/(auth)/selectgroup');
+      router.push('/(auth)/terms');
     } catch (error) {
       console.error('Error signing up:', error);
       Alert.alert('Error', 'There was an issue signing up. Please try again.');

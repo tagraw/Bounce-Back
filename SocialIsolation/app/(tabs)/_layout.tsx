@@ -1,7 +1,6 @@
 import { Tabs } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFonts, Poppins_400Regular, Poppins_700Bold } from '@expo-google-fonts/poppins';
-import type { BottomTabBarIconProps } from '@react-navigation/bottom-tabs';
 
 export default function TabLayout() {
   const [fontsLoaded] = useFonts({
@@ -37,7 +36,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, focused }: BottomTabBarIconProps) => (
+          tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'home' : 'home-outline'} color={color} size={22} />
           ),
         }}
@@ -46,17 +45,26 @@ export default function TabLayout() {
         name="mybucketlist"
         options={{
           title: 'My List',
-          tabBarIcon: ({ color, focused }: BottomTabBarIconProps) => (
+          tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'list' : 'list-outline'} color={color} size={22} />
           ),
         }}
       />
       <Tabs.Screen
-        name="groupmembers"
+        name="groupchat"
         options={{
           title: 'Group',
-          tabBarIcon: ({ color, focused }: BottomTabBarIconProps) => (
+          tabBarIcon: ({ color, focused }) => (
             <Ionicons name={focused ? 'people' : 'people-outline'} color={color} size={22} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="roadmapScreen"
+        options={{
+          title: 'Roadmap',
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'map' : 'map-outline'} color={color} size={22} />
           ),
         }}
       />

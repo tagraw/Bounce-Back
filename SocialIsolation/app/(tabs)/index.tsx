@@ -234,8 +234,9 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     position: 'absolute',
-    bottom: 12,
-    left: 12,
+    top: 20,        // instead of bottom
+    left: 20,
+    alignItems: 'flex-start', // makes sure text aligns left
   },
   cardTitle: {
     fontSize: 18,
