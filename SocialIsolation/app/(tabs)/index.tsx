@@ -26,23 +26,18 @@ export default function HomeScreen() {
   const [userName, setUserName] = useState('');
   const [bucketlist, setBucketlist] = useState<BucketListItem[]>([]);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [rsvpedIds, setRsvpedIds] = useState<Set<string>>(new Set());
 
   const auth = getAuth(app);
   const db = getFirestore(app);
-
-  const totalSubtasks = bucketlist.reduce((sum, item) => sum + (item.Subtasks?.length || 0), 0);
-  const totalCompleted = bucketlist.reduce((sum, item) => sum + (item.CompletedSubtasks?.length || 0), 0);
 
   const fetchUserInfo = async (uid: string) => {
     try {
       const docRef = doc(db, 'users', uid);
       const docSnap = await getDoc(docRef);
-
       if (docSnap.exists()) {
         const userData = docSnap.data();
         setUserName(userData.firstName || 'User');
-      } else {
-        console.log('No such user document!');
       }
     } catch (err) {
       console.error('Error fetching user info:', err);
@@ -69,7 +64,7 @@ export default function HomeScreen() {
       }));
       setBucketlist(items);
     } catch (err) {
-      console.error('Error fetching user bucket list:', err);
+      console.error('Error fetching bucket list:', err);
     }
   };
 
@@ -81,6 +76,10 @@ export default function HomeScreen() {
     });
   };
 
+  const handleRSVP = (id: string) => {
+    setRsvpedIds(prev => new Set(prev).add(id));
+  };
+
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -89,6 +88,12 @@ export default function HomeScreen() {
       console.error('Error signing out:', error);
     }
   };
+
+  const sortedBucketlist = [...bucketlist].sort((a, b) => {
+    const aCompleted = a.CompletedSubtasks?.length === a.Subtasks?.length;
+    const bCompleted = b.CompletedSubtasks?.length === b.Subtasks?.length;
+    return aCompleted === bCompleted ? 0 : aCompleted ? 1 : -1;
+  });
 
   return (
     <ScrollView style={styles.container}>
@@ -107,10 +112,10 @@ export default function HomeScreen() {
 
       <Text style={styles.sectionTitle}>Upcoming Events</Text>
 
-      {bucketlist.map((item) => {
+      {sortedBucketlist.map((item) => {
         const total = item.Subtasks?.length || 0;
-        const completed = item.CompletedSubtasks?.length || 0;
-        const isComplete = total > 0 && completed === total;
+        const done = item.CompletedSubtasks?.length || 0;
+        const isComplete = total > 0 && done === total;
         const isExpanded = expandedIds.has(item.id);
 
         return (
@@ -120,6 +125,38 @@ export default function HomeScreen() {
                 <Image source={{ uri: item.Image }} style={styles.cardImage} />
               )}
               <View style={styles.cardOverlay} />
+              <View style={styles.cardContent}>
+                <Text style={styles.cardTitle}>{item.Name}</Text>
+                <Text style={styles.cardSubtext}>{item.Date} {item.Time}</Text>
+                <Text style={styles.cardSubtext}>{item.Location}</Text>
+              </View>
+
+              {/* Completed or Subtask Badge */}
+              {isComplete ? (
+                <View style={styles.completedBadge}>
+                  <Text style={styles.completedBadgeText}>Completed</Text>
+                </View>
+              ) : (
+                <View style={styles.subtaskBadge}>
+                  <Text style={styles.subtaskBadgeText}>
+                    {   done === 0
+                      ? 'Working on: Subtask #1'
+                      : done === 1
+                      ? 'Working on: Subtask #2'
+                      : done === 2
+                      ? 'Working on: Subtask #3'
+                      : done === 3
+                      ? 'Working on: Subtask #4'
+                      : done === 4
+                      ? 'Working on: Subtask #5'
+                      : done === 5
+                      ? 'Working on: Subtask #6'
+                      : done === 6
+                      ? 'Working on: Subtask #7'
+                      : `Subtask ${done + 1}`}
+                  </Text>
+                </View>
+              )}
 
               <TouchableOpacity onPress={() => toggleExpand(item.id)} style={styles.arrow}>
                 <Ionicons
@@ -129,18 +166,21 @@ export default function HomeScreen() {
                   style={{ transform: [{ rotate: isExpanded ? '180deg' : '0deg' }] }}
                 />
               </TouchableOpacity>
-
-              <View style={styles.cardContent}>
-                <Text style={styles.cardTitle}>{item.Name}</Text>
-                <Text style={styles.cardSubtext}>{item.Date} {item.Time}</Text>
-                <Text style={styles.cardSubtext}>{item.Location}</Text>
-              </View>
             </View>
 
             {isExpanded && (
               <View style={styles.expandedContent}>
                 <Text style={styles.expandedTitle}>About</Text>
                 <Text style={styles.expandedText}>{item.Description || 'No description provided.'}</Text>
+
+                <Text style={styles.expandedTitle}>Next Activity:</Text>
+                {item.Subtasks && item.Subtasks.length > 0 && (
+                  <View style={{ marginBottom: 12 }}>
+                    <Text style={styles.expandedText}>
+                      {item.Subtasks.find(sub => !item.CompletedSubtasks?.includes(sub)) || 'All activities complete!'}
+                    </Text>
+                  </View>
+                )}
 
                 <Text style={styles.expandedTitle}>Who's Attending</Text>
                 <View style={styles.attendeesRow}>
@@ -155,11 +195,19 @@ export default function HomeScreen() {
                   )}
                 </View>
 
-                <Text style={styles.expandedTitle}>RSVP</Text>
-                <View style={styles.rsvpRow}>
-                  <TouchableOpacity style={styles.yesBtn}><Text>Yes</Text></TouchableOpacity>
-                  <TouchableOpacity style={styles.noBtn}><Text>No</Text></TouchableOpacity>
-                </View>
+                <Text style={styles.expandedTitle}>RSVP to this Event</Text>
+                {!rsvpedIds.has(item.id) ? (
+                  <View style={styles.rsvpRow}>
+                    <TouchableOpacity style={styles.yesBtn} onPress={() => handleRSVP(item.id)}>
+                      <Text style={styles.rsvpText}>Yes</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.noBtn} onPress={() => handleRSVP(item.id)}>
+                      <Text style={styles.rsvpText}>No</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <Text style={styles.rsvpConfirmation}>🎉 You've RSVPed for this event!</Text>
+                )}
               </View>
             )}
           </View>
@@ -168,7 +216,12 @@ export default function HomeScreen() {
 
       <View style={styles.summaryCard}>
         <Text style={styles.summaryText}>🎯 You’re tracking {bucketlist.length} items</Text>
-        <Text style={styles.summaryText}>✅ {totalCompleted} / {totalSubtasks} subtasks completed</Text>
+        <Text style={styles.summaryText}>
+          ✅ {bucketlist.reduce((sum, item) => sum + (item.CompletedSubtasks?.length || 0), 0)}
+          {' '}out of{' '}
+          {bucketlist.reduce((sum, item) => sum + (item.Subtasks?.length || 0), 0)}
+          {' '}subtasks completed
+        </Text>
       </View>
     </ScrollView>
   );
@@ -217,9 +270,8 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   cardComplete: {
+    opacity: 0.7,
     backgroundColor: '#fbd5d5',
-    borderColor: '#fbd5d5',
-    borderWidth: 2,
   },
   imageWrapper: {
     position: 'relative',
@@ -234,9 +286,9 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     position: 'absolute',
-    top: 20,        // instead of bottom
+    top: 20,
     left: 20,
-    alignItems: 'flex-start', // makes sure text aligns left
+    alignItems: 'flex-start',
   },
   cardTitle: {
     fontSize: 18,
@@ -247,6 +299,34 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#eee',
     marginTop: 2,
+  },
+  completedBadge: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: '#6cc070',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  completedBadgeText: {
+    fontSize: 12,
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  subtaskBadge: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: '#f9c5d5',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  subtaskBadgeText: {
+    fontSize: 12,
+    color: '#b84a6a',
+    fontWeight: 'bold',
   },
   arrow: {
     position: 'absolute',
@@ -293,19 +373,34 @@ const styles = StyleSheet.create({
   rsvpRow: {
     flexDirection: 'row',
     gap: 12,
-    marginTop: 4,
+    marginTop: 8,
   },
   yesBtn: {
-    backgroundColor: '#c5f1cf',
-    paddingHorizontal: 16,
+    backgroundColor: '#D2E8DC',
+    paddingHorizontal: 20,
     paddingVertical: 8,
-    borderRadius: 20,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#467C5A',
   },
   noBtn: {
-    backgroundColor: '#f9bebe',
-    paddingHorizontal: 16,
+    backgroundColor: 'white',
+    paddingHorizontal: 20,
     paddingVertical: 8,
-    borderRadius: 20,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+  },
+  rsvpText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  rsvpConfirmation: {
+    marginTop: 12,
+    color: '#6cc070',
+    fontWeight: 'bold',
+    fontSize: 14,
   },
   summaryCard: {
     marginTop: 16,

@@ -1,23 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View, Text, StyleSheet, Switch, ImageBackground, Dimensions,
-  ScrollView, TouchableOpacity,
-  Alert,
-  Platform,
-  Modal
+  View, Text, StyleSheet, ScrollView, TouchableOpacity, ImageBackground, Dimensions, Pressable
 } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { getFirestore, doc, getDoc, updateDoc } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
-import { app } from '../../config/firebase';
 import { Ionicons } from '@expo/vector-icons';
+import { getAuth } from 'firebase/auth';
+import { getFirestore, collection, getDocs, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { app } from '../../config/firebase';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 
-// ✅ Define type for bucket list item
 interface BucketListItem {
   Name?: string;
   Image?: string;
+  group: string;
   Subtasks?: string[];
   CompletedSubtasks?: string[];
+  Attendees?: string[];
 }
 
 export default function MyBucketItemDetail() {
@@ -27,18 +24,18 @@ export default function MyBucketItemDetail() {
   const user = auth.currentUser;
   const router = useRouter();
 
-  const [item, setItem] = useState(null);
-  const [completed, setCompleted] = useState([]);
-  const [showModal, setShowModal] = useState(false);
-
+  const [item, setItem] = useState<BucketListItem | null>(null);
+  const [completed, setCompleted] = useState<string[]>([]);
+  const [members, setMembers] = useState<any[]>([]);
+  const [loadingMembers, setLoadingMembers] = useState(true);
 
   const areAllSubtasksCompleted = () => {
-    return item?.Subtasks?.length > 0 && completed.length === item.Subtasks.length;
+    if (item?.Subtasks)
+      return item.Subtasks.length > 0 && completed.length === item.Subtasks.length;
+    return false;
   };
-  
 
   useEffect(() => {
-  
     const fetchItem = async () => {
       if (!user || !id) return;
       const ref = doc(db, 'users', user.uid, 'bucketlist', id);
@@ -54,56 +51,42 @@ export default function MyBucketItemDetail() {
 
   useEffect(() => {
     if (areAllSubtasksCompleted()) {
-      setShowModal(true);
-      
+      router.push('/(tabs)/mybucketlist');
     }
   }, [completed, item]);
 
-  if(showModal){
-    return(    
-      <View style={{ flex: 1 }}>
-        <Modal isVisible={showModal}>
-          <View style={{
-            backgroundColor: 'white',
-            padding: 20,
-            borderRadius: 12,
-            alignItems: 'center'
-          }}>
-            <Text style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 10 }}>
-              Congratulations!
-            </Text>
-            <Text style={{ marginBottom: 20 }}>
-              You've completed all subtasks! Share your success!
-            </Text>
-            <TouchableOpacity
-              style={{ padding: 10, backgroundColor: '#6cc070', borderRadius: 8 }}
-              onPress={() => {
-                router.push('/(tabs)/groupchat')
-                setShowModal(false);
-              }}
-            >
-              <Text style={{ color: 'white', fontWeight: 'bold' }}>Share Now</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{ marginTop: 10 }}
-              onPress={() => setShowModal(false)}
-            >
-              <Text style={{ color: '#999' }}>Maybe Later</Text>
-            </TouchableOpacity>
-          </View>
-        </Modal>
-      </View>
-    );
-  }
+  useEffect(() => {
+    const fetchGroupMembers = async () => {
+      if (!user) return;
+      const userRef = doc(db, 'users', user.uid);
+      const userSnap = await getDoc(userRef);
 
+      if (!userSnap.exists()) return;
+      const group = userSnap.data().group;
 
-  const toggleSubtask = async (taskName) => {
+      const groupQuery = collection(db, 'users');
+      const querySnapshot = await getDocs(groupQuery);
+
+      const groupUsers = querySnapshot.docs
+        .map(doc => ({ id: doc.id, ...(doc.data() as BucketListItem) }))
+        .filter(u => u.group === group);
+
+      setMembers(groupUsers);
+      setLoadingMembers(false);
+    };
+
+    fetchGroupMembers();
+  }, []);
+
+  const toggleSubtask = async (taskName: string) => {
+    if (!user) return;
     const updated = completed.includes(taskName)
       ? completed.filter(t => t !== taskName)
       : [...completed, taskName];
 
     setCompleted(updated);
-    const ref = doc(db, 'users', user!.uid, 'bucketlist', id);
+
+    const ref = doc(db, 'users', user.uid, 'bucketlist', id);
     try {
       await updateDoc(ref, { CompletedSubtasks: updated });
     } catch (err) {
@@ -111,10 +94,7 @@ export default function MyBucketItemDetail() {
     }
   };
 
-  if (!item) return <Text style={{ padding: 20 }}>Loading...</Text>;
-
-  const total = item.Subtasks?.length || 0;
-
+  const total = item?.Subtasks?.length || 0;
   const done = completed.length;
   const progress = total === 0 ? 0 : done / total;
 
@@ -122,7 +102,7 @@ export default function MyBucketItemDetail() {
     <ScrollView style={styles.container}>
       {/* Header Image */}
       <ImageBackground
-        source={{ uri: item.Image }}
+        source={{ uri: item?.Image }}
         style={styles.headerImage}
       >
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
@@ -130,7 +110,7 @@ export default function MyBucketItemDetail() {
         </TouchableOpacity>
 
         <View style={styles.overlay}>
-          <Text style={styles.title}>{item.Name}</Text>
+          <Text style={styles.title}>{item?.Name}</Text>
           <Text style={styles.subtitle}>{done} out of {total} complete</Text>
           <View style={styles.progressBar}>
             <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
@@ -142,7 +122,7 @@ export default function MyBucketItemDetail() {
       <View style={styles.content}>
         <Text style={styles.sectionTitle}>Activities</Text>
         <View style={styles.tasksWrapper}>
-          {item.Subtasks?.map((taskName, index) => (
+          {item?.Subtasks?.map((taskName, index) => (
             <TouchableOpacity
               key={index}
               style={styles.card}
@@ -158,6 +138,41 @@ export default function MyBucketItemDetail() {
             </TouchableOpacity>
           ))}
         </View>
+
+        {/* Line Separator */}
+        <View style={styles.separator} />
+
+        {/* Group Members Section */}
+        <View style={styles.groupHeader}>
+          <Text style={styles.groupTitle}>Group Members</Text>
+          <Pressable
+            style={({ pressed }) => [
+              styles.messageButton,
+              pressed && { backgroundColor: '#a8d5af' }
+            ]}
+          >
+            <Ionicons name="chatbubble-ellipses" size={26} color="#356245" />
+          </Pressable>
+        </View>
+
+        {/* Light Grey Background Box */}
+        <View style={styles.groupMembersBox}>
+          <View style={styles.membersRow}>
+            {loadingMembers ? (
+              <Text>Loading members...</Text>
+            ) : (
+              members.map((member, index) => (
+                <View key={index} style={styles.memberCard}>
+                  <View style={styles.avatarCircle}>
+                    <Ionicons name="person" size={24} color="#444" />
+                  </View>
+                  <Text style={styles.memberName}>{member.firstName} {member.lastName}</Text>
+                </View>
+              ))
+            )}
+          </View>
+        </View>
+
       </View>
     </ScrollView>
   );
@@ -221,7 +236,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 12,
   },
@@ -231,13 +246,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   card: {
-    backgroundColor: '#E6A1A1',
+    backgroundColor: '#e8a4a4',
     width: CARD_WIDTH,
     height: CARD_WIDTH,
     padding: 15,
     borderRadius: 12,
     marginBottom: 16,
-    alignItems: 'center',
   },
   taskText: {
     fontSize: 14,
@@ -246,5 +260,55 @@ const styles = StyleSheet.create({
   completedText: {
     textDecorationLine: 'line-through',
     color: '#999',
+  },
+  separator: {
+    borderBottomWidth: 2,
+    borderBottomColor: '#ddd',
+    marginVertical: 20,
+  },
+  groupHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  groupTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+  },
+  messageButton: {
+    backgroundColor: '#d5e8d4',
+    padding: 10,
+    borderRadius: 20,
+  },
+  groupMembersBox: {
+    backgroundColor: '#f2f2f2', // light grey
+    borderRadius: 12,
+    padding: 16,
+  },
+  membersRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 15,
+    marginTop: 10,
+  },
+  memberCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '45%',
+    marginBottom: 15,
+    gap: 10,
+  },
+  avatarCircle: {
+    backgroundColor: '#fbd5d5', // light pink
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  memberName: {
+    fontSize: 14,
+    fontWeight: 'bold',
   },
 });

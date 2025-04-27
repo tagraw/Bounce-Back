@@ -96,8 +96,8 @@ export default function BucketListDetail() {
         ) : (
           <Text style={styles.subtask}>No subtasks listed.</Text>
         )}
-
-        <TouchableOpacity
+      </View>
+      <TouchableOpacity
           onPress={handleAddToMyList}
           style={styles.button}
           disabled={isAdding}
@@ -106,7 +106,6 @@ export default function BucketListDetail() {
             {isAdding ? 'Adding...' : 'Add to My Bucket List'}
           </Text>
         </TouchableOpacity>
-      </View>
     </View>
   );
 }
@@ -135,27 +134,31 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     fontFamily: 'Poppins_700Bold',
-    marginBottom: 10,
+    marginTop: 10,
+    marginBottom: 20,
     color: '#222',
   },
   subheading: {
     fontSize: 18,
     fontWeight: '600',
-    marginBottom: 8,
+    marginBottom: 10,
     fontFamily: 'Poppins_700Bold',
     color: '#444',
   },
   subtask: {
     fontSize: 14,
     color: '#333',
-    marginBottom: 6,
+    marginBottom: 10,
     fontFamily: 'Poppins_400Regular',
   },
   button: {
-    marginTop: 20,
-    backgroundColor: '#FBD5D5',
+    position: 'absolute',
+    left: 40,
+    right: 40,
+    bottom: 60,  // <- this controls the distance from bottom
+    backgroundColor: '#fbd5d5',
     paddingVertical: 14,
-    borderRadius: 30,
+    borderRadius: 24,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },

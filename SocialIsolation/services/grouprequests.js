@@ -13,17 +13,17 @@ import {
   Poppins_700Bold,
 } from '@expo-google-fonts/poppins';
 
-const groups = [
+const exclusionGroups = [
   'Single Parents',
   'Elderly or Retired',
   'Chronic Illnesses',
   'Military Veterans',
   'Former Prisoners',
-  'Other',
+  'No Preference',
 ];
 
-export const SelectGroup = () => {
-  const [selectedGroup, setSelectedGroup] = useState('');
+export const ExcludeGroups = () => {
+  const [excludedGroups, setExcludedGroups] = useState([]);
   const router = useRouter();
   const auth = getAuth(app);
   const db = getFirestore(app);
@@ -33,20 +33,28 @@ export const SelectGroup = () => {
     Poppins_700Bold,
   });
 
+  const toggleGroup = (group) => {
+    setExcludedGroups((prev) =>
+      prev.includes(group)
+        ? prev.filter((g) => g !== group)
+        : [...prev, group]
+    );
+  };
+
   const handleNext = async () => {
     const user = auth.currentUser;
-    if (!user || !selectedGroup) {
-      Alert.alert('Please select a group.');
+    if (!user) {
+      Alert.alert('Error', 'No user logged in.');
       return;
     }
 
     try {
       const ref = doc(db, 'users', user.uid);
-      await updateDoc(ref, { group: selectedGroup });
-      router.push('/excludeGroups');
+      await updateDoc(ref, { excludedGroups });
+      router.push('/addbucketitems'); // or wherever you want next
     } catch (error) {
-      console.error('Error updating group:', error);
-      Alert.alert('Error saving group selection.');
+      console.error('Error updating excluded groups:', error);
+      Alert.alert('Error saving excluded group selection.');
     }
   };
 
@@ -55,16 +63,18 @@ export const SelectGroup = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.question}>Which of these groups best describes you?</Text>
+        <Text style={styles.question}>
+          Are there any groups you prefer NOT to be associated with?
+        </Text>
 
-        {groups.map((group) => (
+        {exclusionGroups.map((group) => (
           <TouchableOpacity
             key={group}
             style={[
               styles.option,
-              selectedGroup === group && styles.optionSelected
+              excludedGroups.includes(group) && styles.optionSelected
             ]}
-            onPress={() => setSelectedGroup(group)}
+            onPress={() => toggleGroup(group)}
           >
             <Text style={styles.optionText}>{group}</Text>
           </TouchableOpacity>
