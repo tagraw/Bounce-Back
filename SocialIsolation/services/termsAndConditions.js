@@ -9,7 +9,7 @@ export const Conditions = () => {
 
   const handleAgree = () => {
     if (agreed) {
-      router.push('/(auth)/selectgroup'); // change this path to where you want them to go after agreeing
+      router.push('/(auth)/selectgroup'); 
     } else {
       Alert.alert('Agreement Required', 'You must agree to the terms and conditions to proceed.');
     }

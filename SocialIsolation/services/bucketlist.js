@@ -61,7 +61,7 @@ export const BucketList = () => {
     await setDoc(userItemRef, item); // Save full item in user bucket
 
     setSelectedItems((prev) => new Set(prev).add(item.id));
-    router.push(`/bucketlist/${item.id}`);
+    router.push('/bucketlist/${item.id}');
   };
 
   const filteredBucketlist = activeTab === 'All'

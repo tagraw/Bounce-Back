@@ -105,7 +105,7 @@ export default function MyBucketItemDetail() {
         source={{ uri: item?.Image }}
         style={styles.headerImage}
       >
-        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.push('/mybucketlist')}>
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
 

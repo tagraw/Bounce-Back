@@ -3,8 +3,12 @@ import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { app } from '../config/firebase';
+import { useRouter } from 'expo-router';
+import { TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons'; // for back arrow icon
 
 export const Group = () => {
+  const router = useRouter();
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [groupName, setGroupName] = useState('');
@@ -44,7 +48,10 @@ export const Group = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Members in your group:</Text>
+      <TouchableOpacity style={styles.backButton} onPress={() => router.push('/singlechat')}>
+        <Ionicons name="arrow-back" size={28} color="#000" />
+      </TouchableOpacity>
+      <Text style={styles.header}>Members in this groupchat:</Text>
 
       <FlatList
         data={members}
@@ -68,10 +75,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    fontSize: 25,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 16,
-    marginTop: 50,
+    marginBottom: 30,
+    marginTop: 60,
+    marginLeft: 60,
   },
   card: {
     padding: 14,
@@ -90,5 +98,14 @@ const styles = StyleSheet.create({
   loading: {
     padding: 20,
     fontSize: 16,
+  },
+  backButton: {
+    padding: 10,
+    position: 'absolute',
+    top: 70,
+    left: 20,
+    zIndex: 100,
+    backgroundColor: 'white',
+    borderRadius: 30,
   },
 });

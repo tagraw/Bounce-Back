@@ -180,4 +180,5 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
     fontFamily: 'Poppins_600SemiBold',
   },
+  
 });

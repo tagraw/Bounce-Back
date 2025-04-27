@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions
+  View, Text, StyleSheet, ScrollView, TouchableOpacity, Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { getAuth } from 'firebase/auth';
@@ -77,7 +77,7 @@ export default function Index() {
                 <TouchableOpacity
                   key={item.id}
                   style={[styles.card, isCompleted && styles.completedCard]}
-                  onPress={() => router.push(`/userlist/${item.id}`)}
+                  onPress={() => ('/userlist/${item.id}')}
                 >
                   <View style={styles.imageWrapper}>
                     {item.Image && (

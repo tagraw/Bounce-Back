@@ -51,7 +51,7 @@ export const ExcludeGroups = () => {
     try {
       const ref = doc(db, 'users', user.uid);
       await updateDoc(ref, { excludedGroups });
-      router.push('/addbucketitems'); // or wherever you want next
+      router.push('/addbucketitems');
     } catch (error) {
       console.error('Error updating excluded groups:', error);
       Alert.alert('Error saving excluded group selection.');
