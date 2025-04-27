@@ -6,6 +6,7 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import { useFocusEffect } from '@react-navigation/native';
 import { app } from '../config/firebase';
+import { Ionicons } from '@expo/vector-icons';
 
 const windowWidth = Dimensions.get('window').width;
 const scale = windowWidth / 393;
@@ -83,7 +84,7 @@ export const Roadmap = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>My Progress</Text>
-        <View style={styles.profileIcon} />
+         <Ionicons style={styles.icon} name="person-circle-outline" size={42} color="#444" />
       </View>
 
       <ImageBackground source={roadmapImage} style={styles.roadmapImage} resizeMode="cover">

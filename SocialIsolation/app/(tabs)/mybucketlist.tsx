@@ -130,8 +130,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 50,
-    marginBottom: 15,
+    marginTop: 60,
+    marginBottom: 20,
   },
   header: {
     fontSize: 25,
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
   },
   card: {
     width: '100%',
-    aspectRatio: 2,
+    aspectRatio: 2.25,
     marginBottom: 20,
     backgroundColor: '#f9f9f9',
     borderRadius: 14,
