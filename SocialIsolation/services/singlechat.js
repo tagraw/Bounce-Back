@@ -48,43 +48,48 @@ export const ChatScreen = () => {
       try {
         const userRef = doc(db, 'users', user.uid);
         const snap = await getDoc(userRef);
+  
         if (snap.exists()) {
           const userData = snap.data();
           setGroupId(userData.group);
-
-          // Fetch the bucketlist and pick the activity name
+  
+          // Fetch bucketlist items
           const bucketlistSnapshot = await getDocs(collection(db, 'users', user.uid, 'bucketlist'));
           const bucketlistItems = bucketlistSnapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data(),
-        }));
-
-        const usersSnapshot = await getDocs(collection(db, 'users'));
-        const members = usersSnapshot.docs
-          .map(doc => ({ id: doc.id, ...doc.data() }))
-          .filter(u => u.group === userData.group);
-
-        setGroupSize(members.length);
-
-        const incompleteTasks = bucketlistItems.filter(item => item.completed !== true);
-        const completeTasks = bucketlistItems.filter(item => item.completed === true);
-
-        if (incompleteTasks.length > 0) {
-          setGroupName(incompleteTasks[0].Name || 'Group Chat');
-        } else if (completeTasks.length > 0) {
-          const randomIndex = Math.floor(Math.random() * completeTasks.length);
-          setGroupName(completeTasks[randomIndex].Name || 'Group Chat');
-        } else {
-          setGroupName('Group Chat');
+          }));
+  
+          // Fetch group members
+          const usersSnapshot = await getDocs(collection(db, 'users'));
+          const members = usersSnapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() }))
+            .filter(u => u.group === userData.group);
+  
+          setGroupSize(members.length);
+  
+          // Decide group name
+          const incompleteTasks = bucketlistItems.filter(item => item.completed !== true);
+          const completeTasks = bucketlistItems.filter(item => item.completed === true);
+  
+          if (incompleteTasks.length > 0) {
+            // Pick name from first incomplete task
+            setGroupName(incompleteTasks[0].Name || 'Group Chat');
+          } else if (completeTasks.length > 0) {
+            // Pick random complete task
+            const randomIndex = Math.floor(Math.random() * completeTasks.length);
+            setGroupName(completeTasks[randomIndex].Name || 'Group Chat');
+          } else {
+            // No tasks
+            setGroupName('Group Chat');
+          }
         }
-      }
-        if (snap.exists()) setGroupId(snap.data().group);
       } catch (e) {
         console.error('Error fetching group:', e);
       }
     })();
   }, [user]);
-
+  
   // Subscribe to messages in that group
   useEffect(() => {
     if (!groupId) return;

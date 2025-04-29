@@ -77,7 +77,7 @@ export default function Index() {
                 <TouchableOpacity
                   key={item.id}
                   style={[styles.card, isCompleted && styles.completedCard]}
-                  onPress={() => ('/userlist/${item.id}')}
+                  onPress={() => router.push(`/userlist/${item.id}`)}
                 >
                   <View style={styles.imageWrapper}>
                     {item.Image && (
